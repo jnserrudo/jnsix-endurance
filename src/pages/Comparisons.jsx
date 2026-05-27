@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useActivities } from '../hooks/useActivities';
+import { useActivitiesContext } from '../contexts/ActivitiesContext';
 import { comparisonsService } from '../services/comparisons.service';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 const COLORS = ['#00E5FF', '#B5FF3A', '#FF3A6E', '#FFB800', '#9D4EDD', '#06FFA5'];
 
 export const Comparisons = () => {
-  const { activities } = useActivities(1, 50);
+  const { activities, fetchActivities } = useActivitiesContext();
   const [comparisons, setComparisons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -26,7 +26,11 @@ export const Comparisons = () => {
 
   useEffect(() => {
     fetchComparisons();
-  }, []);
+    // Solo fetch actividades si no hay cargadas
+    if (activities.length === 0) {
+      fetchActivities(1, 50);
+    }
+  }, [activities.length, fetchActivities]);
 
   const fetchComparisons = async () => {
     try {

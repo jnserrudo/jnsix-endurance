@@ -38,9 +38,9 @@ export const authService = {
   },
 
   async connectStrava() {
-    console.log('🔵 [FRONTEND] Solicitando URL de autorización de Strava...');
+    console.log('[FRONTEND] Solicitando URL de autorización de Strava...');
     const response = await api.get('/auth/strava');
-    console.log('🔵 [FRONTEND] URL recibida:', response.data.authUrl);
+    console.log('[FRONTEND] URL recibida:', response.data.authUrl);
     return response.data;
   },
 };

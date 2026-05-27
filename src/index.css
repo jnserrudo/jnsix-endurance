@@ -1,7 +1,4 @@
-@import '@fontsource/space-grotesk/400.css';
-@import '@fontsource/space-grotesk/500.css';
-@import '@fontsource/space-grotesk/600.css';
-@import '@fontsource/space-grotesk/700.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/500.css';
 @import '@fontsource/jetbrains-mono/600.css';
@@ -13,19 +10,81 @@
 
 :root {
   --grid-size: 20px;
-  --neon-cyan: #00E5FF;
-  --neon-lime: #B5FF3A;
-  --neon-pink: #FF3A6E;
-  --neon-gold: #FFB800;
+  /* Premium accent colors - more sophisticated, less neon */
+  --accent-cyan: #00D4FF;
+  --accent-lime: #94E85D;
+  --accent-pink: #E85D7A;
+  --accent-gold: #FFA500;
+  --accent-copper: #D47E5E;
+  --accent-deep-blue: #2E5A88;
+  --accent-purple: #9D4EDD;
+  
+  /* Background colors - deep charcoal theme */
+  --app-bg: #1A1F2E;
+  --panel-bg: rgba(26, 31, 46, 0.7);
+  --panel-bg-solid: #232938;
+  
+  /* Text colors - high contrast but elegant */
+  --text-primary: #E8EAED;
+  --text-secondary: #B8BCC5;
+  --text-muted: #8B92A5;
+  
+  /* Border colors */
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-secondary: rgba(255, 255, 255, 0.05);
+  
+  /* Glass effect */
+  --glass-bg: rgba(26, 31, 46, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
 }
 
 @layer base {
   body {
-    @apply bg-app-bg text-text-primary font-sans antialiased;
+    @apply bg-app-bg text-text-primary antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: 
+      linear-gradient(135deg, rgba(0, 212, 255, 0.02) 0%, transparent 50%),
+      linear-gradient(225deg, rgba(148, 232, 93, 0.02) 0%, transparent 50%),
+      radial-gradient(circle at 20% 80%, rgba(232, 93, 122, 0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.03) 0%, transparent 40%),
+      var(--app-bg);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  }
+  
+  /* Topographic texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-image: 
-      radial-gradient(circle, rgba(139, 146, 165, 0.15) 1px, transparent 1px);
-    background-size: var(--grid-size) var(--grid-size);
-    background-position: -1px -1px;
+      radial-gradient(circle, rgba(139, 146, 165, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  /* Fine data grid */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100px 100px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
   
   .metric-value {
@@ -33,46 +92,39 @@
   }
   
   .label-text {
-    @apply text-text-secondary text-xs tracking-relaxed uppercase font-mono;
+    @apply text-text-secondary text-xs tracking-wide uppercase font-mono;
   }
   
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--neon-cyan) #151A23;
+    scrollbar-color: var(--accent-cyan) var(--panel-bg-solid);
   }
   
   *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
   
   *::-webkit-scrollbar-track {
-    background: #151A23;
+    background: var(--panel-bg-solid);
   }
   
   *::-webkit-scrollbar-thumb {
-    background: var(--neon-cyan);
-    border-radius: 0;
+    background: var(--accent-cyan);
+    border-radius: 3px;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-panel-bg border-2 border-border-primary p-6 relative;
-    clip-path: polygon(
-      0 8px,
-      8px 0,
-      100% 0,
-      100% calc(100% - 8px),
-      calc(100% - 8px) 100%,
-      0 100%
-    );
+    @apply bg-panel-bg-solid border border-border-primary p-6 relative;
+    border-radius: 12px;
   }
   
   .card-neon {
     @apply card;
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
   }
   
   .metrics-grid {
@@ -80,48 +132,109 @@
   }
   
   .btn-primary {
-    @apply bg-accent-pace text-app-bg px-6 py-3 font-mono font-bold tracking-tight transition-all relative overflow-hidden;
-    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    @apply bg-accent-cyan text-app-bg px-6 py-3 font-semibold tracking-tight transition-all relative overflow-hidden;
+    border-radius: 8px;
   }
   
   .btn-primary:hover {
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
     transform: translateY(-2px);
   }
   
   .btn-secondary {
-    @apply bg-panel-bg border-2 border-border-primary text-text-primary px-6 py-3 font-mono font-bold tracking-tight transition-all;
-    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    @apply bg-panel-bg-solid border border-border-primary text-text-primary px-6 py-3 font-semibold tracking-tight transition-all;
+    border-radius: 8px;
   }
   
   .btn-secondary:hover {
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
   }
   
   .stat-number {
     @apply font-mono text-5xl font-bold tracking-tighter;
-    text-shadow: 0 0 10px currentColor;
   }
   
-  .neon-text-cyan {
-    color: var(--neon-cyan);
-    text-shadow: 0 0 10px var(--neon-cyan);
+  .text-accent-cyan {
+    color: var(--accent-cyan);
   }
   
-  .neon-text-lime {
-    color: var(--neon-lime);
-    text-shadow: 0 0 10px var(--neon-lime);
+  .text-accent-lime {
+    color: var(--accent-lime);
   }
   
-  .neon-text-pink {
-    color: var(--neon-pink);
-    text-shadow: 0 0 10px var(--neon-pink);
+  .text-accent-pink {
+    color: var(--accent-pink);
   }
   
-  .neon-text-gold {
-    color: var(--neon-gold);
-    text-shadow: 0 0 10px var(--neon-gold);
+  .text-accent-gold {
+    color: var(--accent-gold);
+  }
+  
+  .text-accent-copper {
+    color: var(--accent-copper);
+  }
+  
+  .text-accent-deep-blue {
+    color: var(--accent-deep-blue);
+  }
+  
+  /* Glassmorphism components */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 
+      0 4px 6px var(--glass-shadow),
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-panel {
+    background: rgba(26, 31, 46, 0.5);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+  }
+  
+  .glass-button {
+    background: rgba(0, 212, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .glass-button:hover {
+    background: rgba(0, 212, 255, 0.2);
+    border-color: rgba(0, 212, 255, 0.5);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+  }
+}
+
+@layer utilities {
+  .bg-panel-bg-solid {
+    background-color: var(--panel-bg-solid);
+  }
+  
+  .bg-accent-cyan {
+    background-color: var(--accent-cyan);
+  }
+  
+  .bg-accent-lime {
+    background-color: var(--accent-lime);
+  }
+  
+  .bg-accent-pink {
+    background-color: var(--accent-pink);
+  }
+  
+  .bg-accent-gold {
+    background-color: var(--accent-gold);
   }
 }
 

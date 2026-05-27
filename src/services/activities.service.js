@@ -58,4 +58,16 @@ export const activitiesService = {
     const response = await api.get('/activities/check-new');
     return response.data;
   },
+
+  async createSyncJob(after = null) {
+    const response = await api.post('/activities/sync-job', null, {
+      params: after ? { after } : {}
+    });
+    return response.data;
+  },
+
+  async getSyncJobStatus(jobId) {
+    const response = await api.get(`/activities/sync-job/${jobId}`);
+    return response.data;
+  },
 };

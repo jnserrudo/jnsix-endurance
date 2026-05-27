@@ -21,9 +21,11 @@ export const formatPace = (distanceKm, timeSeconds) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export const formatDistance = (meters) => {
-  if (!meters) return '0.00';
-  const km = meters / 1000;
+export const formatDistance = (value) => {
+  if (!value) return '0.00';
+  // Si el valor es mayor que 1000, asumimos que está en metros
+  // Si es menor, asumimos que está en kilómetros
+  const km = value > 1000 ? value / 1000 : value;
   return km.toFixed(2);
 };
 
@@ -33,7 +35,9 @@ export const formatElevation = (meters) => {
 };
 
 export const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'N/A';
   return new Intl.DateTimeFormat('es-ES', {
     day: '2-digit',
     month: 'short',
@@ -42,7 +46,9 @@ export const formatDate = (dateString) => {
 };
 
 export const formatDateTime = (dateString) => {
+  if (!dateString) return 'N/A';
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'N/A';
   return new Intl.DateTimeFormat('es-ES', {
     day: '2-digit',
     month: 'short',

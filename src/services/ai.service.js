@@ -8,6 +8,28 @@ export const aiService = {
     return response.data;
   },
 
+  async analyzeMultipleActivities(activityIds, analysisType) {
+    const response = await api.post('/ai/analyze-multiple', {
+      activityIds,
+      analysisType,
+    });
+    return response.data;
+  },
+
+  async compareActivities(activityIds) {
+    const response = await api.post('/ai/compare', {
+      activityIds,
+    });
+    return response.data;
+  },
+
+  async analyzeTrends(days) {
+    const response = await api.post('/ai/analyze-trends', {
+      days,
+    });
+    return response.data;
+  },
+
   async generateTrainingPlan(data) {
     const response = await api.post('/ai/training-plan', data);
     return response.data;

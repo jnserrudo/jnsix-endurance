@@ -1,16 +1,17 @@
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 const NavItem = ({ to, icon, label, onClick }) => (
   <NavLink
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `flex items-center gap-3 px-4 py-3 font-mono text-sm transition-all ${
+      `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all rounded-lg mx-2 ${
         isActive
-          ? 'bg-accent-pace/10 border-l-2 border-accent-pace text-accent-pace'
-          : 'text-text-secondary hover:text-text-primary hover:bg-panel-bg/50'
+          ? 'bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/30'
+          : 'text-text-secondary hover:text-text-primary hover:bg-panel-bg-solid/50'
       }`
     }
   >
@@ -30,18 +31,16 @@ export const Sidebar = () => {
       {/* Botón hamburguesa para móvil */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-panel-bg border-2 border-accent-pace p-3 text-accent-pace"
-        style={{
-          clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)'
-        }}
+        className="lg:hidden fixed top-4 left-4 z-50 glass-panel p-3 text-accent-cyan active:scale-95 transition-transform rounded-lg"
+        aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
       >
-        <span className="text-2xl font-mono">{isOpen ? '×' : '☰'}</span>
+        <span className="text-2xl">{isOpen ? '×' : '☰'}</span>
       </button>
 
       {/* Overlay para móvil */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/80 z-40"
+          className="lg:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
           onClick={closeSidebar}
         />
       )}
@@ -49,13 +48,13 @@ export const Sidebar = () => {
       {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-40
-        w-64 bg-panel-bg border-r-2 border-border-primary h-screen flex flex-col
+        w-64 glass-panel h-screen flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-      <div className="p-6 border-b-2 border-accent-pace">
-        <h1 className="text-2xl font-mono font-bold neon-text-cyan">JNSIX</h1>
-        <p className="text-text-secondary font-mono text-xs mt-1">
+      <div className="p-6 border-b border-border-primary">
+        <h1 className="text-2xl font-bold text-accent-cyan tracking-tight">JNSIX</h1>
+        <p className="text-text-secondary text-xs mt-1 font-medium">
           ENDURANCE ANALYTICS
         </p>
       </div>
@@ -68,16 +67,19 @@ export const Sidebar = () => {
         <NavItem to="/settings" icon="◈" label="CONFIGURACIÓN" onClick={closeSidebar} />
       </nav>
 
-      <div className="p-4 border-t-2 border-border-primary">
-        <div className="mb-3 p-3 bg-app-bg">
-          <p className="text-text-secondary font-mono text-xs">USUARIO</p>
-          <p className="text-text-primary font-mono text-sm truncate">
+      <div className="p-4 border-t border-border-primary">
+        <div className="mb-3 p-3 glass-panel">
+          <p className="text-text-secondary text-xs mb-1 font-medium">USUARIO</p>
+          <p className="text-text-primary text-sm truncate">
             {user?.email}
           </p>
         </div>
+        <div className="flex gap-2 mb-3">
+          <ThemeToggle />
+        </div>
         <button
           onClick={logout}
-          className="w-full btn-secondary text-sm py-2"
+          className="w-full bg-panel-bg-solid border border-border-primary text-text-primary px-4 py-3 text-sm font-medium rounded-lg hover:border-accent-cyan hover:shadow-[0_0_15px_rgba(0,212,255,0.15)] transition-all"
         >
           CERRAR SESIÓN
         </button>

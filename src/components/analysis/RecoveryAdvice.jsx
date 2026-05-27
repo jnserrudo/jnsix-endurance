@@ -135,14 +135,14 @@ export const RecoveryAdvice = ({ activities }) => {
     };
 
     return (
-      <div className={`bg-panel-bg border-2 ${priorityColors[rec.priority]} rounded-lg p-4`}>
-        <div className="flex items-start gap-3">
-          <RecIcon size={20} className="text-accent-lime flex-shrink-0 mt-1" />
+      <div className={`bg-panel-bg border-2 ${priorityColors[rec.priority]} rounded-lg p-3 sm:p-4`}>
+        <div className="flex items-start gap-2 sm:gap-3">
+          <RecIcon size={16} className="text-accent-lime flex-shrink-0 mt-1" />
           <div>
-            <h4 className="font-mono font-bold text-text-primary mb-1">
+            <h4 className="font-mono font-bold text-text-primary mb-1 text-xs sm:text-sm">
               {rec.title}
             </h4>
-            <p className="text-text-secondary font-mono text-sm">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-sm">
               {rec.description}
             </p>
           </div>
@@ -153,38 +153,38 @@ export const RecoveryAdvice = ({ activities }) => {
 
   return (
     <Card>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Heart size={20} className="text-accent-lime" />
-            <h3 className="font-mono font-bold text-text-primary">
+          <div className="flex items-center gap-2 mb-1 sm:mb-2">
+            <Heart size={16} className="text-accent-lime" />
+            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base">
               CONSEJOS DE RECUPERACIÓN
             </h3>
           </div>
-          <p className="text-text-secondary font-mono text-sm">
+          <p className="text-text-secondary font-mono text-xs sm:text-sm">
             Basado en tu actividad reciente
           </p>
         </div>
 
         {/* Estado de recuperación */}
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-6">
+        <div className="bg-panel-bg border border-border-primary rounded-lg p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-text-secondary font-mono text-sm mb-1">
+              <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1">
                 ESTADO DE RECUPERACIÓN
               </p>
               <div className="flex items-center gap-2">
-                <RecoveryIcon size={24} className={recoveryLevel.color} />
-                <p className={`text-3xl font-mono font-bold ${recoveryLevel.color}`}>
+                <RecoveryIcon size={20} className={recoveryLevel.color} />
+                <p className={`text-2xl sm:text-3xl font-mono font-bold ${recoveryLevel.color}`}>
                   {recoveryLevel.level}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-text-secondary font-mono text-sm mb-1">
+              <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1">
                 ÚLTIMA ACTIVIDAD
               </p>
-              <p className="text-xl font-mono font-bold text-text-primary">
+              <p className="text-lg sm:text-xl font-mono font-bold text-text-primary">
                 {daysSinceLastActivity !== null ? `${daysSinceLastActivity} días` : 'N/A'}
               </p>
             </div>
@@ -192,44 +192,44 @@ export const RecoveryAdvice = ({ activities }) => {
         </div>
 
         {/* Resumen de la semana */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-panel-bg border border-border-primary rounded-lg p-4 text-center">
-            <p className="text-text-secondary font-mono text-xs mb-1">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4 text-center">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
               DISTANCIA
             </p>
-            <p className="font-mono text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
               {formatDistance(totalDistance)}
             </p>
-            <p className="text-text-secondary font-mono text-xs">km</p>
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">km</p>
           </div>
-          <div className="bg-panel-bg border border-border-primary rounded-lg p-4 text-center">
-            <p className="text-text-secondary font-mono text-xs mb-1">
+          <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4 text-center">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
               TIEMPO
             </p>
-            <p className="font-mono text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
               {formatTime(totalTime)}
             </p>
-            <p className="text-text-secondary font-mono text-xs">horas</p>
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">horas</p>
           </div>
-          <div className="bg-panel-bg border border-border-primary rounded-lg p-4 text-center">
-            <p className="text-text-secondary font-mono text-xs mb-1">
+          <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4 text-center">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
               ELEVACIÓN
             </p>
-            <p className="font-mono text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
               {Math.round(totalElevation)}
             </p>
-            <p className="text-text-secondary font-mono text-xs">m</p>
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">m</p>
           </div>
         </div>
 
         {/* Recomendaciones */}
         <div>
-          <h4 className="font-mono font-bold text-text-primary mb-3">
+          <h4 className="font-mono font-bold text-text-primary mb-2 sm:mb-3 text-sm sm:text-base">
             RECOMENDACIONES
           </h4>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {recommendations.length === 0 ? (
-              <p className="text-text-secondary font-mono text-sm">
+              <p className="text-text-secondary font-mono text-xs sm:text-sm">
                 No hay recomendaciones específicas en este momento.
               </p>
             ) : (
@@ -241,18 +241,18 @@ export const RecoveryAdvice = ({ activities }) => {
         </div>
 
         {/* Tips generales */}
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-          <h4 className="font-mono font-bold text-text-primary mb-3">
-            TIPS GENERALES DE RECUPERACIÓN
+        <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+          <h4 className="font-mono font-bold text-text-primary mb-2 sm:mb-3 text-sm sm:text-base">
+            TIPS GENERALES
           </h4>
-          <div className="space-y-2 text-sm font-mono text-text-secondary">
+          <div className="space-y-1 sm:space-y-2 text-[10px] sm:text-sm font-mono text-text-secondary">
             <div className="flex items-start gap-2">
               <span className="text-accent-lime">•</span>
-              <span>Dormir 7-9 horas por noche para máxima recuperación</span>
+              <span>Dormir 7-9 horas por noche</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-accent-lime">•</span>
-              <span>Hidratarse bien antes, durante y después del entrenamiento</span>
+              <span>Hidratarse bien antes, durante y después</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-accent-lime">•</span>

@@ -194,7 +194,7 @@ export const SegmentComparison = ({ activities }) => {
 
         <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
           <p className="font-mono text-sm text-text-secondary">
-            💡 <span className="text-text-primary">Tip:</span> Los segmentos se agrupan por ubicación aproximada de inicio. Compara tus tiempos en las mismas rutas para ver tu progreso.
+            <span className="text-text-primary">Tip:</span> Los segmentos se agrupan por ubicación aproximada de inicio. Compara tus tiempos en las mismas rutas para ver tu progreso.
           </p>
         </div>
       </div>

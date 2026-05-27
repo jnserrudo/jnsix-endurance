@@ -1,4 +1,5 @@
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { ResponsiveLine } from '@nivo/line';
+import { ResponsiveBar } from '@nivo/bar';
 import { formatDistance, formatDate } from '../../utils/formatters';
 
 export const ProgressCharts = ({ activities }) => {
@@ -39,88 +40,141 @@ export const ProgressCharts = ({ activities }) => {
   const typeChartData = Object.values(typeData);
 
   const colors = {
-    RUN: '#00ff88',
-    RIDE: '#00ffff',
-    SWIM: '#ff00ff',
-    TRAIL_RUN: '#ffff00',
-    VIRTUAL_RUN: '#ff8800',
-    VIRTUAL_RIDE: '#0088ff',
-    OTHER: '#888888'
+    RUN: '#00D4FF',
+    RIDE: '#94E85D',
+    SWIM: '#E85D7A',
+    TRAIL_RUN: '#FFA500',
+    VIRTUAL_RUN: '#D47E5E',
+    VIRTUAL_RIDE: '#2E5A88',
+    OTHER: '#8B92A5'
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Gráfico de distancia semanal */}
-      <div className="bg-panel-bg border-2 border-border-primary rounded-lg p-6">
-        <h3 className="font-mono font-bold text-text-primary mb-4">
-          DISTANCIA SEMANAL (ÚLTIMAS 8 SEMANAS)
+      <div className="glass-panel p-4">
+        <h3 className="font-semibold text-text-primary mb-4 text-sm">
+          DISTANCIA SEMANAL (8 SEMANAS)
         </h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={weeklyChartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis 
-              dataKey="week" 
-              stroke="#888"
-              style={{ fontSize: '12px', fontFamily: 'monospace' }}
-            />
-            <YAxis 
-              stroke="#888"
-              style={{ fontSize: '12px', fontFamily: 'monospace' }}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1a1a2e', 
-                border: '1px solid #00ff88',
-                borderRadius: '8px',
-                fontFamily: 'monospace'
-              }}
-              labelStyle={{ color: '#fff' }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="distance" 
-              stroke="#00ff88" 
-              strokeWidth={2}
-              dot={{ fill: '#00ff88', r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div style={{ height: 200 }}>
+          <ResponsiveLine
+            data={[{ id: 'distance', data: weeklyChartData }]}
+            margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
+            xScale={{ type: 'point' }}
+            yScale={{ type: 'linear', min: 0, max: 'auto' }}
+            curve="monotone"
+            axisBottom={{
+              tickRotation: -45,
+              tickPadding: 10,
+              tickSize: 0,
+              tickColor: '#B8BCC5',
+              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+            }}
+            axisLeft={{
+              tickPadding: 10,
+              tickSize: 0,
+              tickColor: '#B8BCC5',
+              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+            }}
+            enableGridX={false}
+            enableGridY={true}
+            gridYValues={weeklyChartData.map(d => d.distance)}
+            gridYLineColor="rgba(255, 255, 255, 0.05)"
+            colors={['#00D4FF']}
+            lineWidth={3}
+            pointSize={6}
+            pointColor="#00D4FF"
+            pointBorderWidth={2}
+            pointBorderColor="#1A1F2E"
+            enablePointLabel={false}
+            useMesh={true}
+            enableSlices="x"
+            sliceTooltip={({ slice }) => (
+              <div className="glass-panel p-3 rounded-lg">
+                <div className="text-text-primary text-sm font-medium">
+                  {slice.points[0].data.x}
+                </div>
+                <div className="text-accent-cyan font-mono font-bold">
+                  {slice.points[0].data.y.toFixed(1)} km
+                </div>
+              </div>
+            )}
+            theme={{
+              tooltip: {
+                container: {
+                  background: 'rgba(26, 31, 46, 0.9)',
+                  color: '#E8EAED',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                }
+              }
+            }}
+          />
+        </div>
       </div>
 
       {/* Gráfico de actividades por tipo */}
-      <div className="bg-panel-bg border-2 border-border-primary rounded-lg p-6">
-        <h3 className="font-mono font-bold text-text-primary mb-4">
+      <div className="glass-panel p-4">
+        <h3 className="font-semibold text-text-primary mb-4 text-sm">
           ACTIVIDADES POR TIPO
         </h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={typeChartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis 
-              dataKey="type" 
-              stroke="#888"
-              style={{ fontSize: '12px', fontFamily: 'monospace' }}
-            />
-            <YAxis 
-              stroke="#888"
-              style={{ fontSize: '12px', fontFamily: 'monospace' }}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1a1a2e', 
-                border: '1px solid #00ffff',
-                borderRadius: '8px',
-                fontFamily: 'monospace'
-              }}
-              labelStyle={{ color: '#fff' }}
-            />
-            <Bar dataKey="count">
-              {typeChartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[entry.type] || '#888'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div style={{ height: 200 }}>
+          <ResponsiveBar
+            data={typeChartData}
+            keys={['count']}
+            indexBy="type"
+            margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
+            padding={0.3}
+            valueScale={{ type: 'linear' }}
+            indexScale={{ type: 'band', round: true }}
+            colors={({ index }) => colors[typeChartData[index]?.type] || '#8B92A5'}
+            borderRadius={4}
+            borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
+            axisBottom={{
+              tickRotation: -45,
+              tickPadding: 10,
+              tickSize: 0,
+              tickColor: '#B8BCC5',
+              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+            }}
+            axisLeft={{
+              tickPadding: 10,
+              tickSize: 0,
+              tickColor: '#B8BCC5',
+              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+            }}
+            enableGridY={true}
+            gridYLineColor="rgba(255, 255, 255, 0.05)"
+            labelSkipWidth={12}
+            labelSkipHeight={12}
+            labelTextColor="#B8BCC5"
+            labelStyle={{ fontSize: 10 }}
+            tooltip={({ data }) => (
+              <div className="glass-panel p-3 rounded-lg">
+                <div className="text-text-primary text-sm font-medium">
+                  {data.type}
+                </div>
+                <div className="text-accent-lime font-mono font-bold">
+                  {data.count} actividades
+                </div>
+              </div>
+            )}
+            theme={{
+              tooltip: {
+                container: {
+                  background: 'rgba(26, 31, 46, 0.9)',
+                  color: '#E8EAED',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                }
+              }
+            }}
+            animate={true}
+            motionConfig="stiff"
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Card } from '../ui/Card';
+import { ResponsivePie } from '@nivo/pie';
+import { GlassCard } from '../ui/GlassCard';
 
 export const HeartRateZones = ({ activities }) => {
   // Filtrar actividades con datos de frecuencia cardíaca
@@ -7,13 +7,13 @@ export const HeartRateZones = ({ activities }) => {
 
   if (activitiesWithHR.length === 0) {
     return (
-      <Card>
+      <GlassCard>
         <div className="text-center py-8">
-          <p className="text-text-secondary font-mono">
+          <p className="text-text-secondary">
             No hay datos de frecuencia cardíaca disponibles
           </p>
         </div>
-      </Card>
+      </GlassCard>
     );
   }
 
@@ -21,13 +21,13 @@ export const HeartRateZones = ({ activities }) => {
   // Si no tenemos edad, usamos 190 como valor promedio
   const maxHR = 190;
 
-  // Definir zonas de frecuencia cardíaca
+  // Definir zonas de frecuencia cardíaca con colores premium
   const zones = [
-    { name: 'Zona 1', min: 0.5, max: 0.6, color: '#888888', description: 'Recuperación' },
-    { name: 'Zona 2', min: 0.6, max: 0.7, color: '#0088ff', description: 'Aeróbico base' },
-    { name: 'Zona 3', min: 0.7, max: 0.8, color: '#00ff88', description: 'Aeróbico' },
-    { name: 'Zona 4', min: 0.8, max: 0.9, color: '#ff8800', description: 'Umbral' },
-    { name: 'Zona 5', min: 0.9, max: 1.0, color: '#ff0000', description: 'VO2 Max' },
+    { name: 'Zona 1', min: 0.5, max: 0.6, color: '#8B92A5', description: 'Recuperación' },
+    { name: 'Zona 2', min: 0.6, max: 0.7, color: '#2E5A88', description: 'Aeróbico base' },
+    { name: 'Zona 3', min: 0.7, max: 0.8, color: '#94E85D', description: 'Aeróbico' },
+    { name: 'Zona 4', min: 0.8, max: 0.9, color: '#FFA500', description: 'Umbral' },
+    { name: 'Zona 5', min: 0.9, max: 1.0, color: '#E85D7A', description: 'VO2 Max' },
   ];
 
   // Calcular tiempo en cada zona (estimado basado en averageHr)
@@ -41,7 +41,8 @@ export const HeartRateZones = ({ activities }) => {
     const count = zoneActivities.length;
 
     return {
-      name: zone.name,
+      id: zone.name,
+      label: zone.name,
       value: totalTime,
       count,
       color: zone.color,
@@ -65,13 +66,13 @@ export const HeartRateZones = ({ activities }) => {
     const zone5Percent = pieData.find(z => z.name === 'Zona 5')?.percentage || 0;
 
     if (zone5Percent > 20) {
-      return '⚠️ Alto entrenamiento en Zona 5 - Considera más recuperación';
+      return 'ALTO: Alto entrenamiento en Zona 5 - Considera más recuperación';
     } else if (zone4Percent > 30) {
-      return '👍 Buen trabajo en zona de umbral - Mantén la intensidad';
+      return 'BUENO: Buen trabajo en zona de umbral - Mantén la intensidad';
     } else if (zone2Percent + zone3Percent > 70) {
-      return '✅ Excelente base aeróbica - Listo para intensificar';
+      return 'EXCELENTE: Excelente base aeróbica - Listo para intensificar';
     } else {
-      return '💪 Distribución equilibrada - Continúa así';
+      return 'EQUILIBRADO: Distribución equilibrada - Continúa así';
     }
   };
 
@@ -85,71 +86,85 @@ export const HeartRateZones = ({ activities }) => {
   };
 
   return (
-    <Card>
-      <div className="space-y-6">
+    <GlassCard>
+      <div className="space-y-4">
         <div>
-          <h3 className="font-mono font-bold text-text-primary mb-2">
+          <h3 className="font-semibold text-text-primary mb-1 text-sm">
             ZONAS DE FRECUENCIA CARDÍACA
           </h3>
-          <p className="text-text-secondary font-mono text-sm">
-            Basado en HR máxima estimada: {maxHR} bpm
+          <p className="text-text-secondary text-xs">
+            HR máxima estimada: {maxHR} bpm
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Gráfico de dona */}
-          <div>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1a1a2e',
-                    border: '1px solid #00ff88',
-                    borderRadius: '8px',
-                    fontFamily: 'monospace'
-                  }}
-                  formatter={(value) => formatTime(value)}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div style={{ height: 200 }}>
+            <ResponsivePie
+              data={pieData}
+              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              innerRadius={0.6}
+              padAngle={2}
+              cornerRadius={4}
+              activeOuterRadiusOffset={8}
+              colors={({ data }) => data.color}
+              borderWidth={2}
+              borderColor="#1A1F2E"
+              enableArcLinkLabels={false}
+              arcLabelsSkipAngle={10}
+              arcLabelsTextColor="#E8EAED"
+              tooltip={({ datum }) => (
+                <div className="glass-panel p-3 rounded-lg">
+                  <div className="text-text-primary text-sm font-medium">
+                    {datum.label}
+                  </div>
+                  <div className="text-accent-cyan font-mono font-bold">
+                    {datum.percentage}%
+                  </div>
+                  <div className="text-text-secondary text-xs">
+                    {formatTime(datum.value)}
+                  </div>
+                </div>
+              )}
+              theme={{
+                tooltip: {
+                  container: {
+                    background: 'rgba(26, 31, 46, 0.9)',
+                    color: '#E8EAED',
+                    fontSize: 12,
+                    borderRadius: 8,
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                  }
+                }
+              }}
+              animate={true}
+              motionConfig="stiff"
+            />
           </div>
 
           {/* Leyenda y detalles */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {pieData.map((zone) => (
               <div key={zone.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-4 h-4 rounded"
+                    className="w-3 h-3 rounded"
                     style={{ backgroundColor: zone.color }}
                   />
                   <div>
-                    <p className="font-mono text-sm text-text-primary">
+                    <p className="text-xs text-text-primary">
                       {zone.name}
                     </p>
-                    <p className="font-mono text-xs text-text-secondary">
+                    <p className="text-[10px] text-text-secondary">
                       {zone.description}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono font-bold text-text-primary">
+                  <p className="font-mono font-bold text-xs text-text-primary">
                     {zone.percentage}%
                   </p>
-                  <p className="font-mono text-xs text-text-secondary">
+                  <p className="font-mono text-[10px] text-text-secondary">
                     {formatTime(zone.value)}
                   </p>
                 </div>
@@ -159,12 +174,12 @@ export const HeartRateZones = ({ activities }) => {
         </div>
 
         {/* Recomendación */}
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-          <p className="font-mono text-sm text-text-primary">
+        <div className="glass-panel p-3 rounded-lg">
+          <p className="text-xs text-text-primary">
             {getRecommendation()}
           </p>
         </div>
       </div>
-    </Card>
+    </GlassCard>
   );
 };

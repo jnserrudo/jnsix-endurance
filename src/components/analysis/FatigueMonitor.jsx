@@ -76,13 +76,13 @@ export const FatigueMonitor = ({ activities }) => {
   // Recomendaciones
   const getRecommendation = () => {
     if (acwr > 1.5) {
-      return '⚠️ Carga excesiva - Considera días de recuperación inmediatos';
+      return 'CRITICO: Carga excesiva - Considera días de recuperación inmediatos';
     } else if (acwr > 1.3) {
-      return '🔶 Carga alta - Reduce intensidad o volumen en los próximos días';
+      return 'ALTO: Carga alta - Reduce intensidad o volumen en los próximos días';
     } else if (acwr > 0.8) {
-      return '✅ Carga óptima - Mantén el ritmo actual';
+      return 'OPTIMO: Carga óptima - Mantén el ritmo actual';
     } else {
-      return '💪 Carga baja - Puedes aumentar intensidad o volumen';
+      return 'BAJO: Carga baja - Puedes aumentar intensidad o volumen';
     }
   };
 
@@ -92,38 +92,38 @@ export const FatigueMonitor = ({ activities }) => {
 
   return (
     <Card>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Battery size={20} className="text-accent-lime" />
-            <h3 className="font-mono font-bold text-text-primary">
+          <div className="flex items-center gap-2 mb-1 sm:mb-2">
+            <Battery size={16} className="text-accent-lime" />
+            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base">
               MONITOR DE FATIGA
             </h3>
           </div>
-          <p className="text-text-secondary font-mono text-sm">
-            Basado en ACWR (Acute Chronic Workload Ratio)
+          <p className="text-text-secondary font-mono text-xs sm:text-sm">
+            Basado en ACWR
           </p>
         </div>
 
         {/* Nivel de fatiga */}
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-6">
+        <div className="bg-panel-bg border border-border-primary rounded-lg p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-text-secondary font-mono text-sm mb-1">
+              <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1">
                 NIVEL DE FATIGA
               </p>
               <div className="flex items-center gap-2">
-                <FatigueIcon size={24} className={fatigueLevel.color} />
-                <p className={`text-3xl font-mono font-bold ${fatigueLevel.color}`}>
+                <FatigueIcon size={20} className={fatigueLevel.color} />
+                <p className={`text-2xl sm:text-3xl font-mono font-bold ${fatigueLevel.color}`}>
                   {fatigueLevel.level}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-text-secondary font-mono text-sm mb-1">
+              <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1">
                 ACWR
               </p>
-              <p className="text-2xl font-mono font-bold text-text-primary">
+              <p className="text-xl sm:text-2xl font-mono font-bold text-text-primary">
                 {acwr.toFixed(2)}
               </p>
             </div>
@@ -131,77 +131,77 @@ export const FatigueMonitor = ({ activities }) => {
         </div>
 
         {/* Métricas de carga */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-            <p className="text-text-secondary font-mono text-xs mb-1">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
               CARGA (7 días)
             </p>
-            <p className="font-mono text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
               {Math.round(recentLoad)}
             </p>
-            <p className={`font-mono text-xs ${loadTrendColor}`}>
+            <p className={`font-mono text-[10px] sm:text-xs ${loadTrendColor}`}>
               {loadTrend} {Math.round(Math.abs(recentLoad - previousLoad))}
             </p>
           </div>
 
-          <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-            <p className="text-text-secondary font-mono text-xs mb-1">
+          <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
               DISTANCIA
             </p>
-            <p className="font-mono text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
               {formatDistance(recentDistance)}
             </p>
-            <p className="text-text-secondary font-mono text-xs">km</p>
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">km</p>
           </div>
 
-          <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-            <p className="text-text-secondary font-mono text-xs mb-1">
+          <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
               TIEMPO
             </p>
-            <p className="font-mono text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
               {formatTime(recentTime)}
             </p>
-            <p className="text-text-secondary font-mono text-xs">horas</p>
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">horas</p>
           </div>
 
-          <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-            <p className="text-text-secondary font-mono text-xs mb-1">
+          <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
               DÍAS ENTRENADOS
             </p>
-            <p className="font-mono text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
               {recentDays}/7
             </p>
-            <p className="text-text-secondary font-mono text-xs">días</p>
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">días</p>
           </div>
         </div>
 
         {/* Recomendación */}
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-          <p className="font-mono text-sm text-text-primary">
+        <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+          <p className="font-mono text-xs sm:text-sm text-text-primary">
             {getRecommendation()}
           </p>
         </div>
 
         {/* Guía de ACWR */}
         <div className="space-y-2">
-          <p className="text-text-secondary font-mono text-xs">
+          <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
             GUÍA DE ACWR:
           </p>
-          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+          <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-xs font-mono">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-accent-cyan rounded" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-accent-cyan rounded" />
               <span className="text-text-secondary">0.8 - 1.3: Óptimo</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-accent-lime rounded" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-accent-lime rounded" />
               <span className="text-text-secondary">1.3 - 1.5: Moderado</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-accent-gold rounded" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-accent-gold rounded" />
               <span className="text-text-secondary">1.5 - 1.8: Alto</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-accent-pink rounded" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-accent-pink rounded" />
               <span className="text-text-secondary">&gt; 1.8: Crítico</span>
             </div>
           </div>

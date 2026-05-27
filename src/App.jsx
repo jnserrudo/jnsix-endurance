@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { ActivitiesProvider } from './contexts/ActivitiesContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -30,73 +31,75 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/activities"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Activities />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/activities/:id"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <ActivityDetail />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/ai-analysis"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <AIAnalysis />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/comparisons"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Comparisons />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Settings />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/auth/callback" element={<StravaCallback />} />
-      <Route path="/auth/strava/callback" element={<StravaCallback />} />
-      <Route path="/" element={<Navigate to="/dashboard" />} />
-    </Routes>
+    <ActivitiesProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Dashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/activities"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Activities />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/activities/:id"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ActivityDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai-analysis"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AIAnalysis />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/comparisons"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Comparisons />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Settings />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/auth/callback" element={<StravaCallback />} />
+        <Route path="/auth/strava/callback" element={<StravaCallback />} />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </ActivitiesProvider>
   );
 }
 

@@ -16,18 +16,18 @@ export const Settings = () => {
   useEffect(() => {
     // Verificar si hay conexión con Strava
     const isConnected = !!user?.stravaId;
-    console.log('🔵 [SETTINGS] Usuario:', user);
-    console.log('🔵 [SETTINGS] Strava conectado:', isConnected);
+    console.log('[SETTINGS] Usuario:', user);
+    console.log('[SETTINGS] Strava conectado:', isConnected);
     setStravaConnected(isConnected);
   }, [user]);
 
   const handleConnectStrava = async () => {
-    console.log('🔵 [SETTINGS] Iniciando conexión con Strava...');
+    console.log('[SETTINGS] Iniciando conexión con Strava...');
     setLoading(true);
     try {
       const data = await authService.connectStrava();
-      console.log('🔵 [SETTINGS] Datos recibidos:', data);
-      console.log('🔵 [SETTINGS] Redirigiendo a:', data.authUrl);
+      console.log('[SETTINGS] Datos recibidos:', data);
+      console.log('[SETTINGS] Redirigiendo a:', data.authUrl);
       // Redirigir a Strava OAuth
       window.location.href = data.authUrl;
     } catch (error) {
@@ -38,7 +38,7 @@ export const Settings = () => {
   };
 
   const handleSyncStrava = async () => {
-    console.log('🔵 [SETTINGS] Iniciando sincronización COMPLETA...');
+    console.log('[SETTINGS] Iniciando sincronización COMPLETA...');
     setSyncing(true);
     
     // Mostrar toast de inicio
@@ -46,7 +46,7 @@ export const Settings = () => {
     
     try {
       const result = await activitiesService.syncStravaActivities();
-      console.log('✅ [SETTINGS] Sincronización completada:', result);
+      console.log('[SETTINGS] Sincronización completada:', result);
       
       // Cerrar toast de carga
       toast.dismiss(loadingToast);
@@ -63,7 +63,7 @@ export const Settings = () => {
           { icon: '✓', duration: 4000 }
         );
       } else {
-        toast('No se encontraron actividades en Strava', { icon: 'ℹ️' });
+        toast('No se encontraron actividades en Strava');
       }
       
       if (result.errors > 0) {

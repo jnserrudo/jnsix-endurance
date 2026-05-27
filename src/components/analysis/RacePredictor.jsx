@@ -87,59 +87,59 @@ export const RacePredictor = ({ activities }) => {
 
   return (
     <Card>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Target size={20} className="text-accent-lime" />
-            <h3 className="font-mono font-bold text-text-primary">
-              PREDICCIÓN DE TIEMPOS DE CARRERA
+          <div className="flex items-center gap-2 mb-1 sm:mb-2">
+            <Target size={16} className="text-accent-lime" />
+            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base">
+              PREDICCIÓN DE TIEMPOS
             </h3>
           </div>
-          <p className="text-text-secondary font-mono text-sm">
-            Basado en VDOT (Jack Daniels) - VDOT promedio: {avgVDOT.toFixed(1)}
+          <p className="text-text-secondary font-mono text-xs sm:text-sm">
+            VDOT promedio: {avgVDOT.toFixed(1)}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {bestTimes.map((race) => (
-            <div key={race.name} className="bg-panel-bg border border-border-primary rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-mono font-bold text-text-primary">
+            <div key={race.name} className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <h4 className="font-mono font-bold text-text-primary text-sm sm:text-base">
                   {race.name}
                 </h4>
-                <TrendingUp size={16} className="text-accent-lime" />
+                <TrendingUp size={14} className="text-accent-lime" />
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {/* Predicción */}
                 <div>
-                  <p className="text-text-secondary font-mono text-xs mb-1">
+                  <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
                     Tiempo predicho
                   </p>
-                  <p className="font-mono text-lg text-accent-lime font-bold">
+                  <p className="font-mono text-base sm:text-lg text-accent-lime font-bold">
                     {formatTime(race.predictedTime)}
                   </p>
-                  <p className="text-text-secondary font-mono text-xs">
+                  <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
                     Pace: {race.predictedPace.toFixed(1)} min/km
                   </p>
                 </div>
 
                 {/* Mejor tiempo real */}
                 {race.bestTime ? (
-                  <div className="pt-3 border-t border-border-primary">
-                    <p className="text-text-secondary font-mono text-xs mb-1">
+                  <div className="pt-2 sm:pt-3 border-t border-border-primary">
+                    <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
                       Mejor tiempo real
                     </p>
-                    <p className="font-mono text-lg text-text-primary font-bold">
+                    <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
                       {formatTime(race.bestTime)}
                     </p>
-                    <p className="text-text-secondary font-mono text-xs">
+                    <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
                       Pace: {race.bestPace.toFixed(1)} min/km
                     </p>
                   </div>
                 ) : (
-                  <div className="pt-3 border-t border-border-primary">
-                    <p className="text-text-secondary font-mono text-xs">
+                  <div className="pt-2 sm:pt-3 border-t border-border-primary">
+                    <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
                       Sin datos de {race.name}
                     </p>
                   </div>
@@ -147,11 +147,11 @@ export const RacePredictor = ({ activities }) => {
 
                 {/* Comparación */}
                 {race.bestTime && (
-                  <div className="pt-3 border-t border-border-primary">
-                    <p className="text-text-secondary font-mono text-xs">
+                  <div className="pt-2 sm:pt-3 border-t border-border-primary">
+                    <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
                       Diferencia
                     </p>
-                    <p className={`font-mono text-sm font-bold ${
+                    <p className={`font-mono text-xs sm:text-sm font-bold ${
                       race.predictedTime < race.bestTime ? 'text-accent-lime' : 'text-accent-pink'
                     }`}>
                       {race.predictedTime < race.bestTime ? '↑ ' : '↓ '}
@@ -164,9 +164,9 @@ export const RacePredictor = ({ activities }) => {
           ))}
         </div>
 
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-          <p className="font-mono text-sm text-text-secondary">
-            💡 <span className="text-text-primary">Tip:</span> Entrena consistentemente para mejorar tu VDOT y reducir tus tiempos predichos.
+        <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+          <p className="font-mono text-xs sm:text-sm text-text-secondary">
+            <span className="text-text-primary">Tip:</span> Entrena consistentemente para mejorar tu VDOT.
           </p>
         </div>
       </div>

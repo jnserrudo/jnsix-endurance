@@ -25,7 +25,7 @@ export const StravaCallback = () => {
       // Decodificar el token para obtener el usuario
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('🔵 [CALLBACK] Payload del token:', payload);
+        console.log('[CALLBACK] Payload del token:', payload);
         
         // Obtener el usuario completo del backend
         const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
@@ -36,7 +36,7 @@ export const StravaCallback = () => {
         
         if (response.ok) {
           const userData = await response.json();
-          console.log('🔵 [CALLBACK] Usuario completo del backend:', userData);
+          console.log('[CALLBACK] Usuario completo del backend:', userData);
           localStorage.setItem('user', JSON.stringify(userData));
         } else {
           // Fallback: usar datos del token

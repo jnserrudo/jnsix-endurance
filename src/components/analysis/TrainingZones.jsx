@@ -121,32 +121,32 @@ export const TrainingZones = ({ activities }) => {
     const statusText = isOptimal ? '✓ Óptimo' : isBelowIdeal ? '↑ Aumentar' : '↓ Reducir';
 
     return (
-      <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-        <div className="flex items-start justify-between mb-3">
+      <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+        <div className="flex items-start justify-between mb-2 sm:mb-3">
           <div className="flex items-center gap-2">
-            <ZoneIcon size={18} style={{ color: zone.color }} />
+            <ZoneIcon size={14} style={{ color: zone.color }} />
             <div>
-              <h4 className="font-mono font-bold text-text-primary">
+              <h4 className="font-mono font-bold text-text-primary text-xs sm:text-sm">
                 {zone.name}
               </h4>
-              <p className="text-text-secondary font-mono text-xs">
+              <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
                 {zone.description}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className={`font-mono font-bold text-sm ${statusColor}`}>
+            <p className={`font-mono font-bold text-[10px] sm:text-sm ${statusColor}`}>
               {statusText}
             </p>
-            <p className="text-text-secondary font-mono text-xs">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
               Ideal: {ideal}%
             </p>
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           {/* Barra de progreso */}
-          <div className="w-full bg-border-primary rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-border-primary rounded-full h-1.5 sm:h-2 overflow-hidden">
             <div
               className="h-full transition-all duration-300"
               style={{ 
@@ -156,12 +156,12 @@ export const TrainingZones = ({ activities }) => {
             />
           </div>
 
-          <div className="flex justify-between text-xs font-mono">
+          <div className="flex justify-between text-[10px] sm:text-xs font-mono">
             <span className="text-text-secondary">Actual: {zone.percentage}%</span>
             <span className="text-text-secondary">{formatTime(zone.totalTime)}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-xs">
             <div>
               <p className="text-text-secondary">Actividades</p>
               <p className="font-mono text-text-primary">{zone.count}</p>
@@ -172,11 +172,11 @@ export const TrainingZones = ({ activities }) => {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-border-primary">
-            <p className="text-text-secondary font-mono text-xs">
+          <div className="pt-1 sm:pt-2 border-t border-border-primary">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
               {zone.benefit}
             </p>
-            <p className="text-text-secondary font-mono text-xs">
+            <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
               Pace: {zone.pace}
             </p>
           </div>
@@ -187,20 +187,20 @@ export const TrainingZones = ({ activities }) => {
 
   return (
     <Card>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Target size={20} className="text-accent-lime" />
-            <h3 className="font-mono font-bold text-text-primary">
+          <div className="flex items-center gap-2 mb-1 sm:mb-2">
+            <Target size={16} className="text-accent-lime" />
+            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base">
               ZONAS DE ENTRENAMIENTO
             </h3>
           </div>
-          <p className="text-text-secondary font-mono text-sm">
-            Basado en HR máxima estimada: {maxHR} bpm
+          <p className="text-text-secondary font-mono text-xs sm:text-sm">
+            HR máxima estimada: {maxHR} bpm
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {zoneDataWithPercent.map(zone => (
             <ZoneCard 
               key={zone.name} 
@@ -211,26 +211,26 @@ export const TrainingZones = ({ activities }) => {
         </div>
 
         {/* Resumen de distribución */}
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-          <h4 className="font-mono font-bold text-text-primary mb-3">
+        <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+          <h4 className="font-mono font-bold text-text-primary mb-2 sm:mb-3 text-sm sm:text-base">
             RESUMEN DE DISTRIBUCIÓN
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             {zoneDataWithPercent.map(zone => {
               const ideal = idealDistribution[zone.name];
               const diff = zone.percentage - ideal;
               const diffColor = Math.abs(diff) <= 10 ? 'text-accent-lime' : diff > 0 ? 'text-accent-pink' : 'text-accent-cyan';
               
               return (
-                <div key={zone.name} className="flex items-center justify-between text-sm font-mono">
+                <div key={zone.name} className="flex items-center justify-between text-[10px] sm:text-sm font-mono">
                   <div className="flex items-center gap-2">
                     <div 
-                      className="w-3 h-3 rounded" 
+                      className="w-2 h-2 sm:w-3 sm:h-3 rounded" 
                       style={{ backgroundColor: zone.color }}
                     />
                     <span className="text-text-primary">{zone.name}</span>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4">
                     <span className="text-text-secondary">
                       {zone.percentage}% (ideal: {ideal}%)
                     </span>
@@ -245,9 +245,9 @@ export const TrainingZones = ({ activities }) => {
         </div>
 
         {/* Recomendación general */}
-        <div className="bg-panel-bg border border-border-primary rounded-lg p-4">
-          <p className="font-mono text-sm text-text-primary">
-            💡 <span className="text-accent-lime">Pirámide de entrenamiento:</span> 80% en Zonas 1-3 (base), 15% en Zona 4 (umbral), 5% en Zona 5 (VO2 Max)
+        <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
+          <p className="font-mono text-xs sm:text-sm text-text-primary">
+            <span className="text-accent-lime">Pirámide:</span> 80% Z1-3, 15% Z4, 5% Z5
           </p>
         </div>
       </div>
