@@ -43,6 +43,18 @@ export const HeartRateZones = ({ activities }) => {
   // Filtrar actividades con datos de frecuencia cardíaca
   const activitiesWithHR = activities.filter(a => a.averageHr && a.averageHr > 0);
 
+  // Calcular rango de fechas
+  const sortedDates = activitiesWithHR
+    .map(a => new Date(a.startDate))
+    .sort((a, b) => a - b);
+  
+  let dateRangeText = "";
+  if (sortedDates.length > 0) {
+    const minDate = sortedDates[0];
+    const maxDate = sortedDates[sortedDates.length - 1];
+    dateRangeText = `${minDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })} - ${maxDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+  }
+
   if (activitiesWithHR.length === 0) {
     return (
       <GlassCard>
@@ -127,11 +139,11 @@ export const HeartRateZones = ({ activities }) => {
     <GlassCard>
       <div className="space-y-4">
         <div>
-          <h3 className="font-semibold text-text-primary mb-1 text-sm">
-            ZONAS DE FRECUENCIA CARDÍACA
+          <h3 className="font-semibold text-text-primary mb-1 text-sm uppercase">
+            ZONAS DE FRECUENCIA CARDÍACA (HISTORIAL COMPLETO: {activitiesWithHR.length} ACTIVIDADES{dateRangeText ? ` • ${dateRangeText}` : ''})
           </h3>
           <p className="text-text-secondary text-xs">
-            HR máxima estimada: {maxHR} bpm
+            Distribución acumulada del tiempo de esfuerzo de todas tus actividades registradas con frecuencia cardíaca (HR máxima estimada: {maxHR} bpm).
           </p>
         </div>
 

@@ -256,7 +256,7 @@ export const Comparisons = () => {
                       {activity.name || 'Sin título'}
                     </p>
                     <p className="font-mono text-xs text-text-secondary">
-                      {formatDate(activity.startTime)} • {formatDistance(activity.distance)} km
+                      {formatDate(activity.startDate)} • {formatDistance(activity.distanceKm)} km
                     </p>
                   </div>
                 </label>
@@ -277,15 +277,15 @@ const ComparisonDetail = ({ comparison }) => {
 
   const chartData = activities.map((act, index) => ({
     name: act.activity.name?.substring(0, 15) || `Act ${index + 1}`,
-    distance: act.activity.distance / 1000,
+    distance: act.activity.distanceKm || 0,
     time: act.activity.movingTime / 60,
-    pace: act.activity.distance > 0 ? (act.activity.movingTime / 60) / (act.activity.distance / 1000) : 0,
-    elevation: act.activity.totalElevationGain || 0,
+    pace: act.activity.distanceKm > 0 ? (act.activity.movingTime / 60) / act.activity.distanceKm : 0,
+    elevation: act.activity.elevationM || 0,
   }));
 
-  const avgDistance = activities.reduce((sum, a) => sum + a.activity.distance, 0) / activities.length / 1000;
-  const avgTime = activities.reduce((sum, a) => sum + a.activity.movingTime, 0) / activities.length;
-  const avgElevation = activities.reduce((sum, a) => sum + (a.activity.totalElevationGain || 0), 0) / activities.length;
+  const avgDistance = activities.reduce((sum, a) => sum + (a.activity.distanceKm || 0), 0) / activities.length;
+  const avgTime = activities.reduce((sum, a) => sum + (a.activity.movingTime || 0), 0) / activities.length;
+  const avgElevation = activities.reduce((sum, a) => sum + (a.activity.elevationM || 0), 0) / activities.length;
 
   return (
     <div className="space-y-6">
@@ -392,19 +392,19 @@ const ComparisonDetail = ({ comparison }) => {
                     </Link>
                   </td>
                   <td className="py-3 px-2 sm:px-4 text-right text-text-primary">
-                    {formatDistance(act.activity.distance)} km
+                    {formatDistance(act.activity.distanceKm)} km
                   </td>
                   <td className="py-3 px-2 sm:px-4 text-right text-text-primary">
                     {formatTime(act.activity.movingTime)}
                   </td>
                   <td className="py-3 px-2 sm:px-4 text-right text-accent-cyan">
-                    {formatPace(act.activity.distance / 1000, act.activity.movingTime)}
+                    {formatPace(act.activity.distanceKm, act.activity.movingTime)}
                   </td>
                   <td className="py-3 px-2 sm:px-4 text-right text-accent-gold">
-                    {Math.round(act.activity.totalElevationGain || 0)}m
+                    {Math.round(act.activity.elevationM || 0)}m
                   </td>
                   <td className="py-3 px-2 sm:px-4 text-right text-text-secondary text-xs">
-                    {formatDate(act.activity.startTime)}
+                    {formatDate(act.activity.startDate)}
                   </td>
                 </tr>
               ))}

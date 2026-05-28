@@ -230,6 +230,20 @@ export const FatigueMonitor = ({ activities }) => {
     return null;
   };
 
+  // Calcular rango de fechas del historial analizado
+  let timelineRangeText = "";
+  if (timelineData.length > 0) {
+    const firstDay = timelineData[0].dateKey;
+    const lastDay = timelineData[timelineData.length - 1].dateKey;
+    
+    const formatDateKey = (key) => {
+      const parts = key.split('-');
+      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+    };
+    timelineRangeText = ` (${formatDateKey(firstDay)} - ${formatDateKey(lastDay)})`;
+  }
+
   return (
     <Card>
       <div className="space-y-4 sm:space-y-6">
@@ -238,12 +252,12 @@ export const FatigueMonitor = ({ activities }) => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Zap size={16} className="text-accent-cyan" />
-              <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base">
+              <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base uppercase">
                 MONITOR DE FATIGA Y CARGA
               </h3>
             </div>
             <p className="text-text-secondary font-mono text-xs">
-              Métricas de Carga Crónica (CTL) y Aguda (ATL)
+              Métricas de Carga Crónica (CTL) y Aguda (ATL){timelineRangeText}
             </p>
           </div>
 
@@ -441,8 +455,8 @@ export const FatigueMonitor = ({ activities }) => {
             <div className="bg-panel-bg border border-border-primary rounded-lg p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1">
-                    NIVEL DE RIESGO DE FATIGA
+                  <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1 uppercase">
+                    NIVEL DE RIESGO DE FATIGA (ÚLTIMOS 28 DÍAS)
                   </p>
                   <div className="flex items-center gap-2">
                     <FatigueIcon size={20} className={fatigueLevel.color} />
@@ -452,8 +466,8 @@ export const FatigueMonitor = ({ activities }) => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1">
-                    RATIO ACWR ACTIVO
+                  <p className="text-text-secondary font-mono text-xs sm:text-sm mb-1 uppercase">
+                    RATIO ACWR ACTIVO (ÚLTIMOS 28 DÍAS)
                   </p>
                   <p className="text-2xl sm:text-3xl font-mono font-bold text-text-primary">
                     {acwr.toFixed(2)}
@@ -465,20 +479,20 @@ export const FatigueMonitor = ({ activities }) => {
             {/* Metrics cards grid */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
-                <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
+                <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1 uppercase">
                   CARGA DE 7 DÍAS
                 </p>
                 <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
                   {Math.round(recentLoad)}
                 </p>
                 <p className={`font-mono text-[10px] ${recentLoad > previousLoad ? 'text-accent-lime' : 'text-accent-pink'}`}>
-                  {recentLoad > previousLoad ? '↑' : '↓'} {Math.round(Math.abs(recentLoad - previousLoad))} vs sem. anterior
+                  {recentLoad > previousLoad ? '↑' : '↓'} {Math.round(Math.abs(recentLoad - previousLoad))} vs 7d anteriores
                 </p>
               </div>
 
               <div className="bg-panel-bg border border-border-primary rounded-lg p-3 sm:p-4">
-                <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1">
-                  DISTANCIA SEMANAL
+                <p className="text-text-secondary font-mono text-[10px] sm:text-xs mb-1 uppercase">
+                  DISTANCIA 7 DÍAS
                 </p>
                 <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
                   {formatDistance(recentActivities.reduce((sum, a) => sum + (a.distanceKm || 0), 0) * 1000)}

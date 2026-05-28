@@ -46,6 +46,12 @@ export const PerformanceTrends = ({ activities }) => {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
+  const formatDateString = (date) => {
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '');
+  };
+  const recentRange = `${formatDateString(thirtyDaysAgo)} - ${formatDateString(now)}`;
+  const previousRange = `${formatDateString(sixtyDaysAgo)} - ${formatDateString(thirtyDaysAgo)}`;
+
   // Últimos 30 días
   const recentActivities = activities.filter(
     a => new Date(a.startDate) >= thirtyDaysAgo
@@ -161,11 +167,11 @@ export const PerformanceTrends = ({ activities }) => {
     <GlassCard>
       <div className="space-y-6">
         <div>
-          <h3 className="font-semibold text-text-primary mb-2">
-            TENDENCIAS DE RENDIMIENTO
+          <h3 className="font-semibold text-text-primary mb-1 uppercase">
+            TENDENCIAS COMPARATIVAS DE RENDIMIENTO (ÚLTIMOS 30 DÍAS VS 30 DÍAS ANTERIORES)
           </h3>
-          <p className="text-text-secondary text-sm">
-            Comparación: Últimos 30 días vs 30 días anteriores
+          <p className="text-text-secondary text-xs">
+            Comparativa de volumen, ritmo y desnivel de tus últimos 30 días ({recentRange}) vs los 30 días anteriores ({previousRange}).
           </p>
         </div>
 

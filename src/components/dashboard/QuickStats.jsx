@@ -33,12 +33,23 @@ export const QuickStats = ({ activities }) => {
     );
   }
 
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const formatDateShort = (date) => {
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '');
+  };
+
+  const rangeWeek = `${formatDateShort(weekAgo)} - ${formatDateShort(now)}`;
+  const rangeMonth = `${formatDateShort(monthAgo)} - ${formatDateShort(now)}`;
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Esta semana */}
       <Card neon>
         <div className="space-y-1">
-          <p className="label-text text-xs text-text-secondary font-mono">ESTA SEMANA</p>
+          <p className="label-text text-xs text-text-secondary font-mono">ÚLTIMOS 7 DÍAS</p>
           <div className="flex items-baseline gap-1 mt-2">
             <p className="stat-number text-3xl sm:text-5xl font-mono font-bold text-accent-cyan">
               {formatDistance(metrics.thisWeek.distance)}
@@ -46,7 +57,7 @@ export const QuickStats = ({ activities }) => {
             <span className="text-text-secondary font-mono text-xs sm:text-sm">km</span>
           </div>
           <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-2 opacity-80">
-            {metrics.thisWeek.count} actividades
+            {rangeWeek} • {metrics.thisWeek.count} {metrics.thisWeek.count === 1 ? 'actividad' : 'actividades'}
           </p>
         </div>
       </Card>
@@ -54,7 +65,7 @@ export const QuickStats = ({ activities }) => {
       {/* Este mes */}
       <Card neon>
         <div className="space-y-1">
-          <p className="label-text text-xs text-text-secondary font-mono">ESTE MES</p>
+          <p className="label-text text-xs text-text-secondary font-mono">ÚLTIMOS 30 DÍAS</p>
           <div className="flex items-baseline gap-1 mt-2">
             <p className="stat-number text-3xl sm:text-5xl font-mono font-bold text-accent-lime">
               {formatDistance(metrics.thisMonth.distance)}
@@ -62,7 +73,7 @@ export const QuickStats = ({ activities }) => {
             <span className="text-text-secondary font-mono text-xs sm:text-sm">km</span>
           </div>
           <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-2 opacity-80">
-            {metrics.thisMonth.count} actividades
+            {rangeMonth} • {metrics.thisMonth.count} {metrics.thisMonth.count === 1 ? 'actividad' : 'actividades'}
           </p>
         </div>
       </Card>

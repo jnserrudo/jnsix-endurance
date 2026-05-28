@@ -220,63 +220,60 @@ export const Activities = () => {
       ) : (
         <div className="grid gap-3 sm:gap-4">
           {filteredActivities.map((activity) => (
-            <div key={activity.id} className="relative">
-              <Link to={`/activities/${activity.id}`}>
-                <div className="glass-panel p-4 hover:border-accent-cyan transition-all cursor-pointer">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
-                        <span className="text-accent-cyan font-semibold text-sm sm:text-lg">
-                          {formatActivityType(activity.type)}
-                        </span>
-                        <span className="text-text-secondary text-xs sm:text-sm">
-                          {formatDate(activity.startTime)}
-                        </span>
-                      </div>
-                      <h3 className="text-text-primary font-medium text-base sm:text-xl mb-1 sm:mb-2">
-                        {activity.name || 'Sin título'}
-                      </h3>
-                      {activity.description && (
-                        <p className="text-text-secondary text-xs sm:text-sm">
-                          {activity.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-4 sm:gap-8">
-                      <div className="text-center">
-                        <p className="label-text text-[10px] sm:text-xs mb-1">DISTANCIA</p>
-                        <p className="font-mono text-xl sm:text-3xl text-accent-cyan font-bold">
-                          {formatDistance(activity.distance)}
-                        </p>
-                        <p className="text-text-secondary text-[10px] sm:text-xs">KM</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="label-text text-[10px] sm:text-xs mb-1">TIEMPO</p>
-                        <p className="font-mono text-xl sm:text-3xl text-accent-lime font-bold">
-                          {formatTime(activity.movingTime)}
-                        </p>
-                        <p className="text-text-secondary text-[10px] sm:text-xs">H:M:S</p>
-                      </div>
-                      <div className="text-center hidden sm:block">
-                        <p className="label-text text-xs mb-1">DESNIVEL</p>
-                        <p className="font-mono text-3xl text-accent-gold font-bold">
-                          {Math.round(activity.totalElevationGain || 0)}
-                        </p>
-                        <p className="text-text-secondary text-xs">M</p>
-                      </div>
-                    </div>
+            <div key={activity.id} className="glass-panel p-4 hover:border-accent-cyan transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <Link to={`/activities/${activity.id}`} className="flex-1 min-w-0 block">
+                <div>
+                  <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
+                    <span className="text-accent-cyan font-semibold text-sm sm:text-lg">
+                      {formatActivityType(activity.type)}
+                    </span>
+                    <span className="text-text-secondary text-xs sm:text-sm font-mono">
+                      {formatDate(activity.startDate)}
+                    </span>
                   </div>
+                  <h3 className="text-text-primary font-semibold text-base sm:text-xl mb-1 sm:mb-2 hover:text-accent-cyan transition-colors">
+                    {activity.name || 'Sin título'}
+                  </h3>
+                  {activity.description && (
+                    <p className="text-text-secondary text-xs sm:text-sm truncate">
+                      {activity.description}
+                    </p>
+                  )}
                 </div>
               </Link>
-              <Link
-                to={`/ai-analysis?activityId=${activity.id}`}
-                className="absolute top-2 right-2 sm:top-4 sm:right-4"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Button variant="secondary" size="sm" className="text-xs py-2 px-3">
-                  IA
-                </Button>
-              </Link>
+
+              <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto">
+                <Link to={`/activities/${activity.id}`} className="flex gap-4 sm:gap-8 items-center">
+                  <div className="text-center min-w-[70px]">
+                    <p className="label-text text-[10px] sm:text-xs mb-1">DISTANCIA</p>
+                    <p className="font-mono text-xl sm:text-3xl text-accent-cyan font-bold">
+                      {formatDistance(activity.distanceKm)}
+                    </p>
+                    <p className="text-text-secondary text-[10px] sm:text-xs">KM</p>
+                  </div>
+                  <div className="text-center min-w-[70px]">
+                    <p className="label-text text-[10px] sm:text-xs mb-1">TIEMPO</p>
+                    <p className="font-mono text-xl sm:text-3xl text-accent-lime font-bold">
+                      {formatTime(activity.movingTime)}
+                    </p>
+                    <p className="text-text-secondary text-[10px] sm:text-xs">H:M:S</p>
+                  </div>
+                  <div className="text-center min-w-[70px] hidden sm:block">
+                    <p className="label-text text-xs mb-1">DESNIVEL</p>
+                    <p className="font-mono text-3xl text-accent-gold font-bold">
+                      {Math.round(activity.elevationM || 0)}
+                    </p>
+                    <p className="text-text-secondary text-xs">M</p>
+                  </div>
+                </Link>
+                <div className="pl-3 border-l border-border-primary/50 flex items-center h-10">
+                  <Link to={`/ai-analysis?activityId=${activity.id}`}>
+                    <Button variant="secondary" size="sm" className="text-xs py-2 px-3 whitespace-nowrap">
+                      IA
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>

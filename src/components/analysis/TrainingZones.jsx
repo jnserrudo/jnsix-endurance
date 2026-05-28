@@ -6,6 +6,18 @@ export const TrainingZones = ({ activities }) => {
   // Filtrar actividades con datos de frecuencia cardíaca
   const activitiesWithHR = activities.filter(a => a.averageHr && a.averageHr > 0);
 
+  // Calcular rango de fechas de estas actividades
+  const sortedDates = activitiesWithHR
+    .map(a => new Date(a.startDate))
+    .sort((a, b) => a - b);
+  
+  let dateRangeText = "";
+  if (sortedDates.length > 0) {
+    const minDate = sortedDates[0];
+    const maxDate = sortedDates[sortedDates.length - 1];
+    dateRangeText = `${minDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} - ${maxDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+  }
+
   if (activitiesWithHR.length === 0) {
     return (
       <Card>
@@ -191,12 +203,12 @@ export const TrainingZones = ({ activities }) => {
         <div>
           <div className="flex items-center gap-2 mb-1 sm:mb-2">
             <Target size={16} className="text-accent-lime" />
-            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base">
-              ZONAS DE ENTRENAMIENTO
+            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base uppercase">
+              ZONAS DE ENTRENAMIENTO (HISTORIAL COMPLETO: {activitiesWithHR.length} ACTIVIDADES)
             </h3>
           </div>
           <p className="text-text-secondary font-mono text-xs sm:text-sm">
-            HR máxima estimada: {maxHR} bpm
+            Distribución de esfuerzo acumulado{dateRangeText ? ` (${dateRangeText})` : ''} • HR máxima estimada: {maxHR} bpm
           </p>
         </div>
 

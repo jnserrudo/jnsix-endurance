@@ -36,9 +36,22 @@ export const RacePredictor = ({ activities }) => {
   };
 
   // Calcular VDOT promedio de las últimas 10 carreras
-  const recentRuns = runs.slice(-10);
+  const recentRuns = runs.slice(0, 10);
   const vdotValues = recentRuns.map(r => calculateVDOT(r.distanceKm, r.movingTime));
-  const avgVDOT = vdotValues.reduce((sum, v) => sum + v, 0) / vdotValues.length;
+  const avgVDOT = vdotValues.reduce((sum, v) => sum + v, 0) / (vdotValues.length || 1);
+
+  // Calcular el rango de fechas de estas carreras
+  let dateRangeText = "";
+  if (recentRuns.length > 0) {
+    const dates = recentRuns.map(r => new Date(r.startDate));
+    const maxDate = new Date(Math.max(...dates));
+    const minDate = new Date(Math.min(...dates));
+    
+    const formatDateShort = (date) => {
+      return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '');
+    };
+    dateRangeText = `${formatDateShort(minDate)} - ${formatDateShort(maxDate)}`;
+  }
 
   // Predecir tiempos para diferentes distancias usando VDOT
   const predictTime = (distanceKm, vdot) => {
@@ -89,14 +102,14 @@ export const RacePredictor = ({ activities }) => {
     <Card>
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <div className="flex items-center gap-2 mb-1 sm:mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <Target size={16} className="text-accent-lime" />
-            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base">
-              PREDICCIÓN DE TIEMPOS
+            <h3 className="font-mono font-bold text-text-primary text-sm sm:text-base uppercase">
+              PREDICCIÓN DE TIEMPOS (ÚLTIMAS {recentRuns.length} SESIONES DE CARRERA{dateRangeText ? `: ${dateRangeText}` : ''})
             </h3>
           </div>
-          <p className="text-text-secondary font-mono text-xs sm:text-sm">
-            VDOT promedio: {avgVDOT.toFixed(1)}
+          <p className="text-text-secondary font-mono text-xs">
+            Tiempos estimados calculados en base a tu VDOT promedio de tus {recentRuns.length} actividades de tipo carrera más recientes (promedio VDOT: {avgVDOT.toFixed(1)}).
           </p>
         </div>
 

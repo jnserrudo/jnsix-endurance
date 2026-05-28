@@ -63,13 +63,25 @@ export const ProgressCharts = ({ activities }) => {
     return acc;
   }, {});
 
-  const weeklyChartData = Object.values(weeklyData)
-    .sort((a, b) => new Date(a.week) - new Date(b.week))
-    .slice(-8)
-    .map(d => ({
-      x: formatShortDate(d.week),
-      y: d.distance
-    }));
+  const sortedWeeks = Object.values(weeklyData).sort((a, b) => new Date(a.week) - new Date(b.week));
+  const sliceWeeks = sortedWeeks.slice(-8);
+
+  const weeklyChartData = sliceWeeks.map(d => ({
+    x: formatShortDate(d.week),
+    y: d.distance
+  }));
+
+  let dateRangeText = "";
+  if (sliceWeeks.length > 0) {
+    const startWeek = new Date(sliceWeeks[0].week);
+    const endWeek = new Date(sliceWeeks[sliceWeeks.length - 1].week);
+    endWeek.setDate(endWeek.getDate() + 6);
+    
+    const formatRangeDate = (date) => {
+      return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+    };
+    dateRangeText = `${formatRangeDate(startWeek)} - ${formatRangeDate(endWeek)}`;
+  }
 
   // Agrupar por tipo de actividad
   const typeData = activities.reduce((acc, activity) => {
@@ -101,9 +113,14 @@ export const ProgressCharts = ({ activities }) => {
     <div className="space-y-4">
       {/* Gráfico de distancia semanal */}
       <div className="glass-panel p-4">
-        <h3 className="font-semibold text-text-primary mb-4 text-sm">
-          DISTANCIA SEMANAL (8 SEMANAS)
-        </h3>
+        <div>
+          <h3 className="font-semibold text-text-primary text-sm uppercase">
+            DISTANCIA SEMANAL (ÚLTIMAS 8 SEMANAS{dateRangeText ? `: ${dateRangeText}` : ''})
+          </h3>
+          <p className="text-text-secondary text-xs mt-1 mb-4">
+            Volumen acumulado en kilómetros por cada una de las últimas 8 semanas de entrenamiento.
+          </p>
+        </div>
         <div style={{ height: 200 }}>
           <ResponsiveLine
             data={[{ id: 'distance', data: weeklyChartData }]}
@@ -152,9 +169,14 @@ export const ProgressCharts = ({ activities }) => {
 
       {/* Gráfico de actividades por tipo */}
       <div className="glass-panel p-4">
-        <h3 className="font-semibold text-text-primary mb-4 text-sm">
-          ACTIVIDADES POR TIPO
-        </h3>
+        <div>
+          <h3 className="font-semibold text-text-primary text-sm uppercase">
+            DISTRIBUCIÓN POR TIPO DE ACTIVIDAD (HISTORIAL COMPLETO: {activities.length} ACTIVIDADES)
+          </h3>
+          <p className="text-text-secondary text-xs mt-1 mb-4">
+            Cantidad de entrenamientos por cada disciplina deportiva registradas en todo tu historial.
+          </p>
+        </div>
         <div style={{ height: 200 }}>
           <ResponsiveBar
             data={typeChartData}
