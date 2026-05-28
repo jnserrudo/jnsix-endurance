@@ -70,7 +70,7 @@ export const AICoach = () => {
       // Mostrar mensaje de error en el chat
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '⚠️ *Lo siento, ocurrió un error al procesar tu solicitud. Por favor comprueba tu conexión y vuelve a intentarlo.*'
+        content: '*Lo siento, ocurrió un error al procesar tu solicitud. Por favor comprueba tu conexión y vuelve a intentarlo.*'
       }]);
     } finally {
       setSending(false);

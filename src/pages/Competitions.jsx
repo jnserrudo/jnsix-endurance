@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useActivitiesContext } from '../contexts/ActivitiesContext';
 import { competitionsService } from '../services/competitions.service';
 import { aiService } from '../services/ai.service';
@@ -148,10 +150,15 @@ export const Competitions = () => {
     const totalGels = Math.ceil(totalCarbs / 30); // 30g de carbohidratos promedio por gel
     const totalSaltCaps = Math.ceil(hours * 1.5); // 1.5 caps por hora promedio
 
+    // Formato legible de horas: "5h 42min" en vez de "5.7"
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    const hoursFormatted = h > 0 ? `${h}h ${m}min` : `${m}min`;
+
     return {
-      hours: hours.toFixed(1),
+      hours: hoursFormatted,
       totalCarbs,
-      totalFluid: (totalFluid / 1000).toFixed(2),
+      totalFluid: (totalFluid / 1000).toFixed(1),
       totalGels,
       totalSaltCaps
     };
@@ -533,7 +540,7 @@ export const Competitions = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
                       <div className="bg-panel-bg-solid p-3 border border-border-primary rounded text-center">
                         <span className="block text-[8px] text-text-secondary mb-1">TIEMPO ESTIMADO</span>
-                        <span className="text-base font-bold text-text-primary">{nutMetrics.hours} hrs</span>
+                        <span className="text-base font-bold text-text-primary">{nutMetrics.hours}</span>
                       </div>
                       <div className="bg-panel-bg-solid p-3 border border-border-primary rounded text-center">
                         <span className="block text-[8px] text-text-secondary mb-1">TOTAL CARBOHIDRATOS</span>
@@ -564,16 +571,21 @@ export const Competitions = () => {
                       <span className="text-[10px] font-mono text-text-secondary uppercase">Generado hoy</span>
                     </div>
 
-                    <div className="prose prose-invert max-w-none font-mono text-xs leading-relaxed space-y-4 text-text-secondary overflow-y-auto max-h-[500px] pr-2 scrollbar-thin">
-                      {aiReport.split('\n').map((line, idx) => {
-                        if (line.startsWith('###')) {
-                          return <h4 key={idx} className="text-sm font-bold text-accent-cyan mt-6 mb-2 uppercase border-b border-border-primary/50 pb-1">{line.replace('###', '')}</h4>;
-                        }
-                        if (line.startsWith('-')) {
-                          return <li key={idx} className="ml-4 list-disc text-text-primary">{line.replace('-', '').trim()}</li>;
-                        }
-                        return <p key={idx} className={line.trim() === '' ? 'h-2' : 'text-text-secondary'}>{line}</p>;
-                      })}
+                    <div className="prose prose-invert max-w-none font-mono text-xs leading-relaxed text-text-secondary overflow-y-auto max-h-[500px] pr-2 scrollbar-thin">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          h1: ({node, ...props}) => <h1 className="text-lg font-bold text-accent-cyan mt-6 mb-2 uppercase border-b border-border-primary/50 pb-1" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-base font-bold text-accent-cyan mt-6 mb-2 uppercase border-b border-border-primary/50 pb-1" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-sm font-bold text-accent-cyan mt-6 mb-2 uppercase border-b border-border-primary/50 pb-1" {...props} />,
+                          h4: ({node, ...props}) => <h4 className="text-sm font-bold text-accent-cyan mt-6 mb-2 uppercase border-b border-border-primary/50 pb-1" {...props} />,
+                          p: ({node, ...props}) => <p className="mb-4" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-4" {...props} />,
+                          li: ({node, ...props}) => <li className="text-text-primary" {...props} />,
+                        }}
+                      >
+                        {aiReport}
+                      </ReactMarkdown>
                     </div>
                   </Card>
                 )}
