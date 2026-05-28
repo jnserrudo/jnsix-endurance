@@ -154,25 +154,47 @@ export const ActivityDetail = () => {
   // Obtener lapsData desde laps reales, splits de Strava o generar splits virtuales
   let lapsData = [];
   if (activity.laps && activity.laps.length > 0) {
-    lapsData = activity.laps.map((lap, index) => ({
-      km: index + 1,
-      distance: lap.distance || 0,
-      time: lap.movingTime || 0,
-      pace: lap.distance > 0 ? (lap.movingTime / 60) / lap.distance : 0,
-      elevation: lap.elevationGain || 0,
-      hr: lap.averageHr || 0,
-      maxHr: lap.maxHr || 0,
-    }));
+    const isManual = activity.laps.some(l => Math.abs(l.distance - 1.0) > 0.05);
+    lapsData = activity.laps.map((lap, index) => {
+      const paceVal = lap.averagePace || 0;
+      const distVal = lap.distance || 0;
+      return {
+        km: isManual ? `Vuelta ${lap.splitNum || (index + 1)}` : `${lap.splitNum || (index + 1)}`,
+        distance: distVal,
+        time: Math.round(paceVal * distVal * 60),
+        pace: paceVal,
+        elevation: lap.elevationGain || 0,
+        hr: lap.averageHr || 0,
+        maxHr: lap.maxHr || 0,
+      };
+    });
+  } else if (activity.rawData?.laps && Array.isArray(activity.rawData.laps) && activity.rawData.laps.length > 0) {
+    // Usar laps detallados originales de Strava si están en rawData (series de pista)
+    lapsData = activity.rawData.laps.map((lap, index) => {
+      const distKm = (lap.distance || 0) / 1000;
+      return {
+        km: lap.name || `Vuelta ${index + 1}`,
+        distance: distKm,
+        time: Math.round(lap.moving_time || lap.elapsed_time || 0),
+        pace: distKm > 0 ? (lap.moving_time || lap.elapsed_time || 0) / 60 / distKm : 0,
+        elevation: lap.total_elevation_gain || 0,
+        hr: lap.average_heartrate || 0,
+        maxHr: lap.max_heartrate || 0,
+      };
+    });
   } else if (activity.rawData?.splits_metric && Array.isArray(activity.rawData.splits_metric)) {
-    lapsData = activity.rawData.splits_metric.map((split, index) => ({
-      km: split.split || (index + 1),
-      distance: (split.distance || 0) / 1000,
-      time: split.moving_time || split.elapsed_time || 0,
-      pace: split.distance > 0 ? (split.moving_time / 60) / ((split.distance || 0) / 1000) : 0,
-      elevation: split.elevation_difference || 0,
-      hr: split.average_heartrate || 0,
-      maxHr: split.average_heartrate || 0,
-    }));
+    lapsData = activity.rawData.splits_metric.map((split, index) => {
+      const distKm = (split.distance || 0) / 1000;
+      return {
+        km: `${split.split || (index + 1)}`,
+        distance: distKm,
+        time: Math.round(split.moving_time || split.elapsed_time || 0),
+        pace: distKm > 0 ? (split.moving_time || split.elapsed_time || 0) / 60 / distKm : 0,
+        elevation: split.elevation_difference || 0,
+        hr: split.average_heartrate || 0,
+        maxHr: split.average_heartrate || 0,
+      };
+    });
   } else if (activity.distanceKm > 0) {
     const totalDist = activity.distanceKm;
     const totalTime = activity.movingTime;
@@ -185,9 +207,9 @@ export const ActivityDetail = () => {
     
     for (let i = 0; i < numFullKms; i++) {
       lapsData.push({
-        km: i + 1,
+        km: `${i + 1}`,
         distance: 1.0,
-        time: totalTime / totalDist,
+        time: Math.round(totalTime / totalDist),
         pace: avgPace,
         elevation: activity.elevationM > 0 ? activity.elevationM / totalDist : 0,
         hr: avgHr,
@@ -197,9 +219,9 @@ export const ActivityDetail = () => {
     
     if (lastKmFraction > 0.05) {
       lapsData.push({
-        km: numFullKms + 1,
+        km: `${numFullKms + 1}`,
         distance: lastKmFraction,
-        time: (totalTime / totalDist) * lastKmFraction,
+        time: Math.round((totalTime / totalDist) * lastKmFraction),
         pace: avgPace,
         elevation: activity.elevationM > 0 ? (activity.elevationM / totalDist) * lastKmFraction : 0,
         hr: avgHr,
@@ -207,6 +229,7 @@ export const ActivityDetail = () => {
       });
     }
   }
+
 
 // Decodificar o extraer coordenadas
   const coords = (() => {
@@ -678,12 +701,16 @@ export const ActivityDetail = () => {
           {/* Tabla de Splits */}
           {lapsData && lapsData.length > 0 && (
             <Card className="p-4">
-              <h3 className="text-sm font-mono font-bold text-text-primary mb-4 tracking-tight">DETALLE POR KILÓMETRO</h3>
+              <h3 className="text-sm font-mono font-bold text-text-primary mb-4 tracking-tight">
+                {activity.laps?.some(l => Math.abs(l.distance - 1.0) > 0.05) || activity.rawData?.laps?.length > 0
+                  ? 'DETALLE POR VUELTA' 
+                  : 'DETALLE POR KILÓMETRO'}
+              </h3>
               <div className="overflow-x-auto">
                 <table className="w-full font-mono text-xs">
                   <thead>
                     <tr className="border-b border-border-primary">
-                      <th className="text-left py-2 px-2 label-text">KM</th>
+                      <th className="text-left py-2 px-2 label-text">VUELTA / KM</th>
                       <th className="text-right py-2 px-2 label-text">DISTANCIA</th>
                       <th className="text-right py-2 px-2 label-text">TIEMPO</th>
                       <th className="text-right py-2 px-2 label-text">RITMO</th>
@@ -691,6 +718,7 @@ export const ActivityDetail = () => {
                       <th className="text-right py-2 px-2 label-text">FC</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {lapsData.map((lap, index) => (
                       <tr
