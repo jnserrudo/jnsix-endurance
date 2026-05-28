@@ -22,8 +22,8 @@ export const ProgressCharts = ({ activities }) => {
     .sort((a, b) => new Date(a.week) - new Date(b.week))
     .slice(-8)
     .map(d => ({
-      ...d,
-      week: formatDate(d.week)
+      x: formatDate(d.week),
+      y: d.distance
     }));
 
   // Agrupar por tipo de actividad
@@ -62,7 +62,7 @@ export const ProgressCharts = ({ activities }) => {
             margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
             xScale={{ type: 'point' }}
             yScale={{ type: 'linear', min: 0, max: 'auto' }}
-            curve="monotone"
+            curve="monotoneX"
             axisBottom={{
               tickRotation: -45,
               tickPadding: 10,
@@ -78,7 +78,7 @@ export const ProgressCharts = ({ activities }) => {
             }}
             enableGridX={false}
             enableGridY={true}
-            gridYValues={weeklyChartData.map(d => d.distance)}
+            gridYValues={weeklyChartData.map(d => d.y)}
             gridYLineColor="rgba(255, 255, 255, 0.05)"
             colors={['#00D4FF']}
             lineWidth={3}

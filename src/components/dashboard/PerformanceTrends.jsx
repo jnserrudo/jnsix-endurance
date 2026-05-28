@@ -143,7 +143,7 @@ export const PerformanceTrends = ({ activities }) => {
                 margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
                 xScale={{ type: 'point' }}
                 yScale={{ type: 'linear', min: 0, max: 'auto' }}
-                curve="monotone"
+                curve="monotoneX"
                 axisBottom={{
                   tickRotation: -45,
                   tickPadding: 10,
