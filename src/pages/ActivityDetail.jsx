@@ -5,11 +5,12 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Spinner } from '../components/ui/Spinner';
 import { formatDistance, formatTime, formatDate, formatActivityType, formatPace, formatElevation } from '../utils/formatters';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area, ReferenceLine } from 'recharts';
 import toast from 'react-hot-toast';
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Play, Pause, RotateCcw, Compass } from 'lucide-react';
 
 // Fix Leaflet marker icons in Vite
 delete L.Icon.Default.prototype._getIconUrl;
@@ -91,6 +92,17 @@ const ChangeMapView = ({ coords }) => {
   return null;
 };
 
+// React Leaflet Map center updater
+const RecenterMap = ({ center, shouldRecenter }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center && shouldRecenter) {
+      map.setView(center, map.getZoom(), { animate: true });
+    }
+  }, [center, shouldRecenter, map]);
+  return null;
+};
+
 export const ActivityDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -98,6 +110,14 @@ export const ActivityDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeMobileTab, setActiveMobileTab] = useState('charts'); // 'charts' | 'map'
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  // Estados del reproductor GPS
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackIndex, setPlaybackIndex] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [followCursor, setFollowCursor] = useState(false);
+  const [coordsDistances, setCoordsDistances] = useState([]);
+  const [isHoveringChart, setIsHoveringChart] = useState(false);
 
   useEffect(() => {
     const fetchActivity = async () => {
@@ -188,13 +208,71 @@ export const ActivityDetail = () => {
     }
   }
 
-  // Decodificar o extraer coordenadas
-  let coords = [];
-  if (activity.rawData?.coordinates && Array.isArray(activity.rawData.coordinates)) {
-    coords = activity.rawData.coordinates;
-  } else if (activity.rawData?.map?.summary_polyline) {
-    coords = decodePolyline(activity.rawData.map.summary_polyline);
-  }
+// Decodificar o extraer coordenadas
+  const coords = (() => {
+    if (!activity) return [];
+    if (activity.rawData?.coordinates && Array.isArray(activity.rawData.coordinates)) {
+      return activity.rawData.coordinates;
+    } else if (activity.rawData?.map?.summary_polyline) {
+      return decodePolyline(activity.rawData.map.summary_polyline);
+    }
+    return [];
+  })();
+
+  // Calcular distancias acumuladas para cada punto de la ruta
+  useEffect(() => {
+    if (coords && coords.length > 0) {
+      const dists = [0];
+      let accum = 0;
+      for (let i = 1; i < coords.length; i++) {
+        const d = calculateDistance(coords[i - 1][0], coords[i - 1][1], coords[i][0], coords[i][1]);
+        accum += d / 1000;
+        dists.push(accum);
+      }
+      setCoordsDistances(dists);
+    } else {
+      setCoordsDistances([]);
+    }
+  }, [coords]);
+
+  // Timer del Reproductor GPS
+  useEffect(() => {
+    let timer = null;
+    if (isPlaying && coords.length > 0) {
+      // Paso dinámico para mantener suavidad e interactividad
+      const step = Math.ceil((coords.length / 200) * playbackSpeed);
+      timer = setInterval(() => {
+        setPlaybackIndex((prevIndex) => {
+          if (prevIndex + step >= coords.length - 1) {
+            setIsPlaying(false);
+            return coords.length - 1;
+          }
+          return prevIndex + step;
+        });
+      }, 100);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isPlaying, playbackSpeed, coords.length]);
+
+  // Sincronizar el reproductor con el hoveredIndex de los gráficos
+  useEffect(() => {
+    if (!isHoveringChart && coordsDistances.length > 0 && playbackIndex !== null) {
+      const currentDist = coordsDistances[playbackIndex];
+      const lapIdx = Math.min(lapsData.length - 1, Math.floor(currentDist));
+      if (lapIdx >= 0 && lapIdx !== hoveredIndex) {
+        setHoveredIndex(lapIdx);
+      }
+    }
+  }, [playbackIndex, coordsDistances, isHoveringChart, lapsData.length, hoveredIndex]);
+
+  const handlePlayPause = () => {
+    if (playbackIndex >= coords.length - 1) {
+      setPlaybackIndex(0);
+    }
+    setIsPlaying(!isPlaying);
+  };
 
   // Coordenada del punto interactivo
   const hoveredCoord = hoveredIndex !== null && coords.length > 0
@@ -386,8 +464,88 @@ export const ActivityDetail = () => {
                     className="animate-pulse"
                   />
                 )}
+                {/* Indicador de reproducción del reproductor GPS */}
+                {playbackIndex < coords.length && (
+                  <CircleMarker
+                    center={coords[playbackIndex]}
+                    radius={9}
+                    fillColor="#00D4FF"
+                    fillOpacity={1}
+                    color="#FFFFFF"
+                    weight={2}
+                  />
+                )}
                 <ChangeMapView coords={coords} />
+                <RecenterMap center={coords[playbackIndex]} shouldRecenter={followCursor} />
               </MapContainer>
+
+              {/* Controles del Reproductor flotantes */}
+              <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-panel-bg/95 backdrop-blur-md border border-border-primary p-3 rounded-lg flex flex-col gap-2 shadow-lg">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handlePlayPause}
+                      className="p-2 bg-accent-cyan hover:bg-accent-cyan/85 text-app-bg rounded-full transition-all focus:outline-none flex items-center justify-center cursor-pointer"
+                      title={isPlaying ? 'Pausar' : 'Reproducir'}
+                    >
+                      {isPlaying ? <Pause size={14} className="fill-app-bg stroke-app-bg" /> : <Play size={14} className="fill-app-bg stroke-app-bg ml-0.5" />}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsPlaying(false);
+                        setPlaybackIndex(0);
+                      }}
+                      className="p-2 hover:bg-panel-bg-solid text-text-primary border border-border-primary rounded-full transition-all focus:outline-none flex items-center justify-center cursor-pointer"
+                      title="Reiniciar"
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+                    <button
+                      onClick={() => setFollowCursor(!followCursor)}
+                      className={`p-2 rounded-full border transition-all focus:outline-none flex items-center justify-center cursor-pointer ${
+                        followCursor
+                          ? 'bg-accent-lime/20 border-accent-lime text-accent-lime'
+                          : 'hover:bg-panel-bg-solid border-border-primary text-text-secondary'
+                      }`}
+                      title={followCursor ? 'Fijar cámara al cursor' : 'Seguir cursor con cámara'}
+                    >
+                      <Compass size={14} className={followCursor ? 'animate-spin-slow' : ''} />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-text-secondary uppercase">Velocidad:</span>
+                    <select
+                      value={playbackSpeed}
+                      onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                      className="bg-panel-bg-solid border border-border-primary rounded px-1.5 py-1 text-xs font-mono font-bold text-text-primary focus:outline-none focus:border-accent-cyan cursor-pointer"
+                    >
+                      <option value="1">1x</option>
+                      <option value="2">2x</option>
+                      <option value="5">5x</option>
+                      <option value="10">10x</option>
+                      <option value="20">20x</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] font-mono text-text-secondary w-14 font-semibold font-mono">
+                    {coordsDistances[playbackIndex] ? `${coordsDistances[playbackIndex].toFixed(2)} km` : '0.00 km'}
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={coords.length - 1}
+                    value={playbackIndex}
+                    onChange={(e) => setPlaybackIndex(Number(e.target.value))}
+                    className="flex-1 h-1 bg-border-primary rounded-lg appearance-none cursor-pointer accent-accent-cyan focus:outline-none"
+                  />
+                  <span className="text-[10px] font-mono text-text-secondary w-10 text-right font-semibold font-mono">
+                    {coords.length > 0 ? `${Math.round((playbackIndex / (coords.length - 1)) * 100)}%` : '0%'}
+                  </span>
+                </div>
+              </div>
             </Card>
           </div>
         )}
@@ -406,9 +564,12 @@ export const ActivityDetail = () => {
                       onMouseMove={(state) => {
                         if (state && state.activeTooltipIndex !== undefined) {
                           setHoveredIndex(state.activeTooltipIndex);
+                          setIsHoveringChart(true);
                         }
                       }}
-                      onMouseLeave={() => setHoveredIndex(null)}
+                      onMouseLeave={() => {
+                        setIsHoveringChart(false);
+                      }}
                     >
                       <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.05)" />
                       <XAxis
@@ -438,6 +599,14 @@ export const ActivityDetail = () => {
                         fillOpacity={0.15}
                         strokeWidth={3}
                       />
+                      {hoveredIndex !== null && lapsData[hoveredIndex] && (
+                        <ReferenceLine
+                          x={lapsData[hoveredIndex].km}
+                          stroke="#00D4FF"
+                          strokeWidth={2}
+                          strokeDasharray="3 3"
+                        />
+                      )}
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -455,9 +624,12 @@ export const ActivityDetail = () => {
                       onMouseMove={(state) => {
                         if (state && state.activeTooltipIndex !== undefined) {
                           setHoveredIndex(state.activeTooltipIndex);
+                          setIsHoveringChart(true);
                         }
                       }}
-                      onMouseLeave={() => setHoveredIndex(null)}
+                      onMouseLeave={() => {
+                        setIsHoveringChart(false);
+                      }}
                     >
                       <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.05)" />
                       <XAxis
@@ -488,6 +660,14 @@ export const ActivityDetail = () => {
                         strokeWidth={3}
                         name="FC Media"
                       />
+                      {hoveredIndex !== null && lapsData[hoveredIndex] && (
+                        <ReferenceLine
+                          x={lapsData[hoveredIndex].km}
+                          stroke="#FF3A6E"
+                          strokeWidth={2}
+                          strokeDasharray="3 3"
+                        />
+                      )}
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -513,7 +693,12 @@ export const ActivityDetail = () => {
                   </thead>
                   <tbody>
                     {lapsData.map((lap, index) => (
-                      <tr key={index} className="border-b border-border-primary hover:bg-panel-bg/50">
+                      <tr
+                        key={index}
+                        className={`border-b border-border-primary hover:bg-panel-bg/50 transition-all ${
+                          hoveredIndex === index ? 'bg-accent-cyan/15 border-l-2 border-accent-cyan' : ''
+                        }`}
+                      >
                         <td className="py-2 px-2 text-accent-pace font-bold">{lap.km}</td>
                         <td className="py-2 px-2 text-right text-text-primary">{formatDistance(lap.distance || 0)} km</td>
                         <td className="py-2 px-2 text-right text-text-primary">{formatTime(lap.time || 0)}</td>

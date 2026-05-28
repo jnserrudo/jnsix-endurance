@@ -8,6 +8,7 @@ import { ProgressCharts } from '../components/dashboard/ProgressCharts';
 import { QuickStats } from '../components/dashboard/QuickStats';
 import { HeartRateZones } from '../components/dashboard/HeartRateZones';
 import { PerformanceTrends } from '../components/dashboard/PerformanceTrends';
+import { PaceCalculator } from '../components/analysis/PaceCalculator';
 import { RacePredictor } from '../components/analysis/RacePredictor';
 import { FatigueMonitor } from '../components/analysis/FatigueMonitor';
 import { TrainingZones } from '../components/analysis/TrainingZones';
@@ -156,6 +157,7 @@ export const Dashboard = () => {
 
       {activeTab === 'predicciones' && (
         <div className="space-y-6">
+          {activities.length > 0 && <PaceCalculator activities={activities} />}
           {activities.length > 0 && <RacePredictor activities={activities} />}
           {activities.length > 0 && <FatigueMonitor activities={activities} />}
         </div>
