@@ -12,7 +12,9 @@ import { AIAnalysis } from './pages/AIAnalysis';
 import { Comparisons } from './pages/Comparisons';
 import { Settings } from './pages/Settings';
 import { AICoach } from './pages/AICoach';
+import { Competitions } from './pages/Competitions';
 import { StravaCallback } from './pages/StravaCallback';
+
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -112,6 +114,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/competitions"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Competitions />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/settings"
           element={
