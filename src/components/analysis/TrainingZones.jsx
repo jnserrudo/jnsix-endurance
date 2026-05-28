@@ -78,7 +78,7 @@ export const TrainingZones = ({ activities }) => {
   // Calcular tiempo en cada zona
   const zoneData = trainingZones.map(zone => {
     const zoneActivities = activitiesWithHR.filter(a => {
-      const hrPercent = a.averageHr / maxHR;
+      const hrPercent = (a.averageHr / maxHR) * 100;
       return hrPercent >= zone.minPercent && hrPercent < zone.maxPercent;
     });
 

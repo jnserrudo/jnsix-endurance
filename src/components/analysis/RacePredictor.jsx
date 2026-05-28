@@ -1,6 +1,6 @@
 import { Card } from '../ui/Card';
 import { Target, TrendingUp } from 'lucide-react';
-import { formatTime } from '../../utils/formatters';
+import { formatTime, formatPace } from '../../utils/formatters';
 
 export const RacePredictor = ({ activities }) => {
   // Filtrar solo carreras (Run) con datos de distancia y tiempo
@@ -120,7 +120,7 @@ export const RacePredictor = ({ activities }) => {
                     {formatTime(race.predictedTime)}
                   </p>
                   <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
-                    Pace: {race.predictedPace.toFixed(1)} min/km
+                    Pace: {formatPace(1, race.predictedPace * 60)} min/km
                   </p>
                 </div>
 
@@ -134,7 +134,7 @@ export const RacePredictor = ({ activities }) => {
                       {formatTime(race.bestTime)}
                     </p>
                     <p className="text-text-secondary font-mono text-[10px] sm:text-xs">
-                      Pace: {race.bestPace.toFixed(1)} min/km
+                      Pace: {formatPace(1, race.bestPace * 60)} min/km
                     </p>
                   </div>
                 ) : (

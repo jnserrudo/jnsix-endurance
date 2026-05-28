@@ -15,8 +15,13 @@ export const formatPace = (distanceKm, timeSeconds) => {
   if (!distanceKm || !timeSeconds) return '0:00';
   
   const paceMinPerKm = (timeSeconds / 60) / distanceKm;
-  const minutes = Math.floor(paceMinPerKm);
-  const seconds = Math.round((paceMinPerKm - minutes) * 60);
+  let minutes = Math.floor(paceMinPerKm);
+  let seconds = Math.round((paceMinPerKm - minutes) * 60);
+  
+  if (seconds === 60) {
+    minutes += 1;
+    seconds = 0;
+  }
   
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };

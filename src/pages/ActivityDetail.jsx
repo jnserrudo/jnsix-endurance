@@ -131,15 +131,62 @@ export const ActivityDetail = () => {
   const maxHr = activity.maxHr || 0;
   const intensity = maxHr > 0 ? Math.round((avgHr / maxHr) * 100) : 0;
 
-  const lapsData = activity.laps?.map((lap, index) => ({
-    km: index + 1,
-    distance: lap.distance || 0,
-    time: lap.movingTime || 0,
-    pace: lap.distance > 0 ? (lap.movingTime / 60) / (lap.distance / 1000) : 0,
-    elevation: lap.elevationGain || 0,
-    hr: lap.averageHr || 0,
-    maxHr: lap.maxHr || 0,
-  })) || [];
+  // Obtener lapsData desde laps reales, splits de Strava o generar splits virtuales
+  let lapsData = [];
+  if (activity.laps && activity.laps.length > 0) {
+    lapsData = activity.laps.map((lap, index) => ({
+      km: index + 1,
+      distance: lap.distance || 0,
+      time: lap.movingTime || 0,
+      pace: lap.distance > 0 ? (lap.movingTime / 60) / lap.distance : 0,
+      elevation: lap.elevationGain || 0,
+      hr: lap.averageHr || 0,
+      maxHr: lap.maxHr || 0,
+    }));
+  } else if (activity.rawData?.splits_metric && Array.isArray(activity.rawData.splits_metric)) {
+    lapsData = activity.rawData.splits_metric.map((split, index) => ({
+      km: split.split || (index + 1),
+      distance: (split.distance || 0) / 1000,
+      time: split.moving_time || split.elapsed_time || 0,
+      pace: split.distance > 0 ? (split.moving_time / 60) / ((split.distance || 0) / 1000) : 0,
+      elevation: split.elevation_difference || 0,
+      hr: split.average_heartrate || 0,
+      maxHr: split.average_heartrate || 0,
+    }));
+  } else if (activity.distanceKm > 0) {
+    const totalDist = activity.distanceKm;
+    const totalTime = activity.movingTime;
+    const avgPace = totalDist > 0 ? (totalTime / 60) / totalDist : 0;
+    const avgHr = activity.averageHr || 0;
+    const maxHr = activity.maxHr || avgHr;
+    
+    const numFullKms = Math.floor(totalDist);
+    const lastKmFraction = totalDist - numFullKms;
+    
+    for (let i = 0; i < numFullKms; i++) {
+      lapsData.push({
+        km: i + 1,
+        distance: 1.0,
+        time: totalTime / totalDist,
+        pace: avgPace,
+        elevation: activity.elevationM > 0 ? activity.elevationM / totalDist : 0,
+        hr: avgHr,
+        maxHr: maxHr
+      });
+    }
+    
+    if (lastKmFraction > 0.05) {
+      lapsData.push({
+        km: numFullKms + 1,
+        distance: lastKmFraction,
+        time: (totalTime / totalDist) * lastKmFraction,
+        pace: avgPace,
+        elevation: activity.elevationM > 0 ? (activity.elevationM / totalDist) * lastKmFraction : 0,
+        hr: avgHr,
+        maxHr: maxHr
+      });
+    }
+  }
 
   // Decodificar o extraer coordenadas
   let coords = [];
@@ -449,7 +496,7 @@ export const ActivityDetail = () => {
           </div>
 
           {/* Tabla de Splits */}
-          {activity.laps && activity.laps.length > 0 && (
+          {lapsData && lapsData.length > 0 && (
             <Card className="p-4">
               <h3 className="text-sm font-mono font-bold text-text-primary mb-4 tracking-tight">DETALLE POR KILÓMETRO</h3>
               <div className="overflow-x-auto">
@@ -465,14 +512,14 @@ export const ActivityDetail = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {activity.laps.map((lap, index) => (
+                    {lapsData.map((lap, index) => (
                       <tr key={index} className="border-b border-border-primary hover:bg-panel-bg/50">
-                        <td className="py-2 px-2 text-accent-pace font-bold">{index + 1}</td>
+                        <td className="py-2 px-2 text-accent-pace font-bold">{lap.km}</td>
                         <td className="py-2 px-2 text-right text-text-primary">{formatDistance(lap.distance || 0)} km</td>
-                        <td className="py-2 px-2 text-right text-text-primary">{formatTime(lap.movingTime || 0)}</td>
-                        <td className="py-2 px-2 text-right text-accent-cyan">{formatPace((lap.distance || 0) / 1000, lap.movingTime || 0)}</td>
-                        <td className="py-2 px-2 text-right text-accent-gold">{formatElevation(lap.elevationGain || 0)} m</td>
-                        <td className="py-2 px-2 text-right text-accent-pink">{lap.averageHr ? Math.round(lap.averageHr) : '-'}</td>
+                        <td className="py-2 px-2 text-right text-text-primary">{formatTime(lap.time || 0)}</td>
+                        <td className="py-2 px-2 text-right text-accent-cyan">{formatPace(lap.distance || 0, lap.time || 0)}</td>
+                        <td className="py-2 px-2 text-right text-accent-gold">{formatElevation(lap.elevation || 0)} m</td>
+                        <td className="py-2 px-2 text-right text-accent-pink">{lap.hr ? Math.round(lap.hr) : '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -488,13 +535,17 @@ export const ActivityDetail = () => {
               <div className="p-3 bg-panel-bg/50 border border-border-primary rounded">
                 <p className="label-text text-[10px] mb-1">RITMO MEJOR</p>
                 <p className="font-mono text-base font-bold text-accent-cyan">
-                  {lapsData.length > 0 ? formatPace(1, Math.min(...lapsData.map(d => d.time))) : '-'}
+                  {lapsData.length > 0 && Math.min(...lapsData.filter(d => d.pace > 0).map(d => d.pace)) !== Infinity
+                    ? formatPace(1, Math.min(...lapsData.filter(d => d.pace > 0).map(d => d.pace)) * 60)
+                    : '-'}
                 </p>
               </div>
               <div className="p-3 bg-panel-bg/50 border border-border-primary rounded">
                 <p className="label-text text-[10px] mb-1">RITMO PEOR</p>
                 <p className="font-mono text-base font-bold text-accent-pink">
-                  {lapsData.length > 0 ? formatPace(1, Math.max(...lapsData.map(d => d.time))) : '-'}
+                  {lapsData.length > 0 && Math.max(...lapsData.filter(d => d.pace > 0).map(d => d.pace)) !== -Infinity
+                    ? formatPace(1, Math.max(...lapsData.filter(d => d.pace > 0).map(d => d.pace)) * 60)
+                    : '-'}
                 </p>
               </div>
               <div className="p-3 bg-panel-bg/50 border border-border-primary rounded">
@@ -506,7 +557,7 @@ export const ActivityDetail = () => {
               <div className="p-3 bg-panel-bg/50 border border-border-primary rounded">
                 <p className="label-text text-[10px] mb-1">FC PROMEDIO</p>
                 <p className="font-mono text-base font-bold text-accent-pink">
-                  {lapsData.some(d => d.hr > 0) ? Math.round(lapsData.reduce((sum, d) => sum + d.hr, 0) / lapsData.filter(d => d.hr > 0).length) : '-'}
+                  {activity.averageHr ? Math.round(activity.averageHr) : (lapsData.some(d => d.hr > 0) ? Math.round(lapsData.reduce((sum, d) => sum + d.hr, 0) / lapsData.filter(d => d.hr > 0).length) : '-')}
                 </p>
               </div>
             </div>
