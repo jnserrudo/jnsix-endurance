@@ -43,4 +43,12 @@ export const authService = {
     console.log('[FRONTEND] URL recibida:', response.data.authUrl);
     return response.data;
   },
+
+  async disconnectStrava() {
+    console.log('[FRONTEND] Solicitando desconexión de Strava...');
+    const response = await api.post('/auth/strava/disconnect');
+    console.log('[FRONTEND] Respuesta de desconexión recibida:', response.data);
+    return response.data;
+  },
 };
+

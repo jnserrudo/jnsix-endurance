@@ -8,10 +8,11 @@ import { Spinner } from '../components/ui/Spinner';
 import toast from 'react-hot-toast';
 
 export const Settings = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
+
 
   useEffect(() => {
     // Verificar si hay conexión con Strava
@@ -37,7 +38,27 @@ export const Settings = () => {
     }
   };
 
+  const handleDisconnectStrava = async () => {
+    console.log('[SETTINGS] Desconectando Strava...');
+    setLoading(true);
+    try {
+      const updatedUser = await authService.disconnectStrava();
+      
+      // Actualizar el estado local y localStorage
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      toast.success('Cuenta de Strava desconectada con éxito');
+    } catch (error) {
+      console.error('🔴 [SETTINGS] Error al desconectar:', error);
+      toast.error(error.response?.data?.error || 'Error al desconectar Strava');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSyncStrava = async () => {
+
     console.log('[SETTINGS] Iniciando sincronización COMPLETA...');
     setSyncing(true);
     
@@ -175,9 +196,15 @@ export const Settings = () => {
                 {syncing ? 'SINCRONIZANDO TODAS LAS ACTIVIDADES...' : 'SINCRONIZAR TODAS LAS ACTIVIDADES'}
               </Button>
 
-              <Button variant="danger" className="w-full">
-                DESCONECTAR STRAVA
+              <Button
+                variant="danger"
+                className="w-full"
+                onClick={handleDisconnectStrava}
+                loading={loading}
+              >
+                {loading ? 'DESCONECTANDO...' : 'DESCONECTAR STRAVA'}
               </Button>
+
             </div>
           ) : (
             <div className="space-y-6">
