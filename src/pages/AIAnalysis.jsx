@@ -315,7 +315,7 @@ export const AIAnalysis = () => {
                     onChange={(e) => setSelectedActivity(e.target.value)}
                     className="w-full bg-panel-bg-solid border border-border-primary px-3 sm:px-4 py-2 sm:py-3 text-text-primary focus:border-accent-cyan focus:outline-none rounded-lg text-xs sm:text-sm"
                   >
-                    <option value="">-- Selecciona --</option>
+                    <option value="">Selecciona Actividad</option>
                     {filteredActivities.map((activity) => (
                       <option key={activity.id} value={activity.id} className="text-xs">
                         {getActivityDisplayData(activity)}

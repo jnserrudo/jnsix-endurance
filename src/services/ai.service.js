@@ -54,4 +54,9 @@ export const aiService = {
     const response = await api.get('/ai/usage');
     return response.data;
   },
+
+  async chatWithCoach(messages) {
+    const response = await api.post('/ai/coach', { messages });
+    return response.data;
+  },
 };

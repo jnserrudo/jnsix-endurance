@@ -10,6 +10,7 @@ import { Spinner } from '../components/ui/Spinner';
 import { ExportButton } from '../components/ui/ExportButton';
 import { formatDistance, formatTime, formatDate, formatActivityType } from '../utils/formatters';
 import toast from 'react-hot-toast';
+import { useDropzone } from 'react-dropzone';
 
 const ACTIVITY_TYPES = [
   { value: '', label: 'Todos' },
@@ -55,9 +56,15 @@ export const Activities = () => {
     return matchesType && matchesSearch && matchesDateFrom && matchesDateTo;
   });
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
+  const onDrop = async (acceptedFiles) => {
+    const file = acceptedFiles[0];
     if (!file) return;
+
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (!['fit', 'gpx', 'tcx'].includes(extension)) {
+      toast.error('Formato no soportado. Sube archivos .FIT, .GPX o .TCX');
+      return;
+    }
 
     setUploading(true);
     try {
@@ -71,6 +78,12 @@ export const Activities = () => {
       setUploading(false);
     }
   };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    disabled: uploading
+  });
 
   const handleImportStrava = async () => {
     if (!stravaUrl) return;
@@ -275,20 +288,33 @@ export const Activities = () => {
         title="SUBIR ARCHIVO"
       >
         <div className="space-y-4">
-          <p className="text-text-secondary font-mono text-sm">
-            Formatos soportados: .FIT, .GPX, .TCX
-          </p>
-          <input
-            type="file"
-            accept=".fit,.gpx,.tcx"
-            onChange={handleFileUpload}
-            disabled={uploading}
-            className="w-full bg-panel-bg border-2 border-border-primary p-4 font-mono text-text-primary file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-accent-pace file:text-app-bg file:font-mono file:font-bold"
-          />
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+              isDragActive
+                ? 'border-accent-cyan bg-accent-cyan/10'
+                : 'border-border-primary hover:border-accent-cyan bg-panel-bg'
+            } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <input {...getInputProps()} />
+            <div className="flex flex-col items-center justify-center space-y-3">
+              <span className="text-3xl text-accent-cyan animate-pulse-neon">
+                ☁️
+              </span>
+              <p className="text-sm font-mono text-text-primary">
+                {isDragActive
+                  ? 'Suelta el archivo aquí...'
+                  : 'Arrastra tu archivo aquí o haz clic para buscar'}
+              </p>
+              <p className="text-xs font-mono text-text-secondary">
+                Formatos soportados: .FIT, .GPX, .TCX (Máx. 15MB)
+              </p>
+            </div>
+          </div>
           {uploading && (
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-3 bg-panel-bg p-3 rounded-lg border border-border-primary">
               <Spinner />
-              <span className="text-text-secondary font-mono">Subiendo...</span>
+              <span className="text-text-secondary font-mono text-xs">Subiendo y procesando actividad...</span>
             </div>
           )}
         </div>

@@ -11,6 +11,7 @@ import { ActivityDetail } from './pages/ActivityDetail';
 import { AIAnalysis } from './pages/AIAnalysis';
 import { Comparisons } from './pages/Comparisons';
 import { Settings } from './pages/Settings';
+import { AICoach } from './pages/AICoach';
 import { StravaCallback } from './pages/StravaCallback';
 
 const ProtectedRoute = ({ children }) => {
@@ -87,6 +88,16 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <AIAnalysis />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai-coach"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AICoach />
               </MainLayout>
             </ProtectedRoute>
           }

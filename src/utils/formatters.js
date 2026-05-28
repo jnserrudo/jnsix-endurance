@@ -63,6 +63,9 @@ export const formatActivityType = (type) => {
     RUN: 'Carrera',
     TRAIL_RUN: 'Trail Running',
     BIKE: 'Ciclismo',
+    RIDE: 'Ciclismo',
+    VIRTUAL_RIDE: 'Ciclismo Virtual',
+    VIRTUAL_RUN: 'Carrera Virtual',
     SWIM: 'Natación',
     OTHER: 'Otro',
   };

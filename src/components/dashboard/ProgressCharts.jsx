@@ -1,6 +1,6 @@
 import { ResponsiveLine } from '@nivo/line';
 import { ResponsiveBar } from '@nivo/bar';
-import { formatDistance, formatDate } from '../../utils/formatters';
+import { formatDistance, formatDate, formatActivityType } from '../../utils/formatters';
 
 const CHART_THEME = {
   axis: {
@@ -41,6 +41,13 @@ const CHART_THEME = {
 };
 
 export const ProgressCharts = ({ activities }) => {
+  const formatShortDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '');
+  };
+
   // Agrupar actividades por semana (últimas 8 semanas)
   const weeklyData = activities.reduce((acc, activity) => {
     const date = new Date(activity.startDate);
@@ -60,7 +67,7 @@ export const ProgressCharts = ({ activities }) => {
     .sort((a, b) => new Date(a.week) - new Date(b.week))
     .slice(-8)
     .map(d => ({
-      x: formatDate(d.week),
+      x: formatShortDate(d.week),
       y: d.distance
     }));
 
@@ -75,7 +82,10 @@ export const ProgressCharts = ({ activities }) => {
     return acc;
   }, {});
 
-  const typeChartData = Object.values(typeData);
+  const typeChartData = Object.values(typeData).map(d => ({
+    ...d,
+    translatedType: formatActivityType(d.type)
+  }));
 
   const colors = {
     RUN: '#00D4FF',
@@ -97,22 +107,21 @@ export const ProgressCharts = ({ activities }) => {
         <div style={{ height: 200 }}>
           <ResponsiveLine
             data={[{ id: 'distance', data: weeklyChartData }]}
-            margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
+            margin={{ top: 20, right: 20, bottom: 50, left: 60 }}
             xScale={{ type: 'point' }}
             yScale={{ type: 'linear', min: 0, max: 'auto' }}
             curve="monotoneX"
+            enableArea={true}
+            areaOpacity={0.15}
             axisBottom={{
-              tickRotation: -45,
+              tickRotation: -30,
               tickPadding: 10,
-              tickSize: 0,
-              tickColor: '#B8BCC5',
-              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+              tickSize: 0
             }}
             axisLeft={{
               tickPadding: 10,
               tickSize: 0,
-              tickColor: '#B8BCC5',
-              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+              tickValues: 5
             }}
             enableGridX={false}
             enableGridY={true}
@@ -150,26 +159,23 @@ export const ProgressCharts = ({ activities }) => {
           <ResponsiveBar
             data={typeChartData}
             keys={['count']}
-            indexBy="type"
-            margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
+            indexBy="translatedType"
+            margin={{ top: 20, right: 20, bottom: 50, left: 60 }}
             padding={0.3}
             valueScale={{ type: 'linear' }}
             indexScale={{ type: 'band', round: true }}
-            colors={({ index }) => colors[typeChartData[index]?.type] || '#8B92A5'}
+            colors={({ data }) => colors[data.type] || '#8B92A5'}
             borderRadius={4}
             borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
             axisBottom={{
-              tickRotation: -45,
+              tickRotation: -20,
               tickPadding: 10,
-              tickSize: 0,
-              tickColor: '#B8BCC5',
-              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+              tickSize: 0
             }}
             axisLeft={{
               tickPadding: 10,
               tickSize: 0,
-              tickColor: '#B8BCC5',
-              style: { tick: { fill: '#B8BCC5', fontSize: 10 } }
+              tickValues: 5
             }}
             enableGridY={true}
             gridYLineColor="rgba(255, 255, 255, 0.05)"
@@ -180,10 +186,10 @@ export const ProgressCharts = ({ activities }) => {
             tooltip={({ data }) => (
               <div className="glass-panel p-3 rounded-lg">
                 <div className="text-text-primary text-sm font-medium">
-                  {data.type}
+                  {data.translatedType}
                 </div>
                 <div className="text-accent-lime font-mono font-bold">
-                  {data.count} actividades
+                  {data.count} {data.count === 1 ? 'actividad' : 'actividades'}
                 </div>
               </div>
             )}
