@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { ActivitiesProvider } from './contexts/ActivitiesContext';
+import { ActivitiesProvider, useActivitiesContext } from './contexts/ActivitiesContext';
 import { MainLayout } from './components/layout/MainLayout';
+import { PageSkeleton } from './components/ui/PageSkeleton';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
@@ -29,6 +30,17 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+const InitialLoadWrapper = ({ children }) => {
+  const { activities, loading } = useActivitiesContext();
+
+  // Mostrar skeleton solo si es la primera carga (activities vacío y loading true)
+  if (loading && activities.length === 0) {
+    return <PageSkeleton />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
     <ActivitiesProvider>
@@ -39,9 +51,11 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <MainLayout>
-                <Dashboard />
-              </MainLayout>
+              <InitialLoadWrapper>
+                <MainLayout>
+                  <Dashboard />
+                </MainLayout>
+              </InitialLoadWrapper>
             </ProtectedRoute>
           }
         />
@@ -49,9 +63,11 @@ function App() {
           path="/activities"
           element={
             <ProtectedRoute>
-              <MainLayout>
-                <Activities />
-              </MainLayout>
+              <InitialLoadWrapper>
+                <MainLayout>
+                  <Activities />
+                </MainLayout>
+              </InitialLoadWrapper>
             </ProtectedRoute>
           }
         />
