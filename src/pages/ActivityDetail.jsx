@@ -119,6 +119,100 @@ export const ActivityDetail = () => {
   const [coordsDistances, setCoordsDistances] = useState([]);
   const [isHoveringChart, setIsHoveringChart] = useState(false);
 
+  // Decodificar o extraer coordenadas
+  const coords = (() => {
+    if (!activity) return [];
+    if (activity.rawData?.coordinates && Array.isArray(activity.rawData.coordinates)) {
+      return activity.rawData.coordinates;
+    } else if (activity.rawData?.map?.summary_polyline) {
+      return decodePolyline(activity.rawData.map.summary_polyline);
+    }
+    return [];
+  })();
+
+  // Obtener lapsData desde laps reales, splits de Strava o generar splits virtuales
+  const lapsData = (() => {
+    if (!activity) return [];
+    const data = [];
+    if (activity.laps && activity.laps.length > 0) {
+      const isManual = activity.laps.some(l => Math.abs(l.distance - 1.0) > 0.05);
+      return activity.laps.map((lap, index) => {
+        const paceVal = lap.averagePace || 0;
+        const distVal = lap.distance || 0;
+        return {
+          km: isManual ? `Vuelta ${lap.splitNum || (index + 1)}` : `${lap.splitNum || (index + 1)}`,
+          distance: distVal,
+          time: Math.round(paceVal * distVal * 60),
+          pace: paceVal,
+          elevation: lap.elevationGain || 0,
+          hr: lap.averageHr || 0,
+          maxHr: lap.maxHr || 0,
+        };
+      });
+    } else if (activity.rawData?.laps && Array.isArray(activity.rawData.laps) && activity.rawData.laps.length > 0) {
+      return activity.rawData.laps.map((lap, index) => {
+        const distKm = (lap.distance || 0) / 1000;
+        return {
+          km: lap.name || `Vuelta ${index + 1}`,
+          distance: distKm,
+          time: Math.round(lap.moving_time || lap.elapsed_time || 0),
+          pace: distKm > 0 ? (lap.moving_time || lap.elapsed_time || 0) / 60 / distKm : 0,
+          elevation: lap.total_elevation_gain || 0,
+          hr: lap.average_heartrate || 0,
+          maxHr: lap.max_heartrate || 0,
+        };
+      });
+    } else if (activity.rawData?.splits_metric && Array.isArray(activity.rawData.splits_metric)) {
+      return activity.rawData.splits_metric.map((split, index) => {
+        const distKm = (split.distance || 0) / 1000;
+        return {
+          km: `${split.split || (index + 1)}`,
+          distance: distKm,
+          time: Math.round(split.moving_time || split.elapsed_time || 0),
+          pace: distKm > 0 ? (split.moving_time || split.elapsed_time || 0) / 60 / distKm : 0,
+          elevation: split.elevation_difference || 0,
+          hr: split.average_heartrate || 0,
+          maxHr: split.average_heartrate || 0,
+        };
+      });
+    } else if (activity.distanceKm > 0) {
+      const totalDist = activity.distanceKm;
+      const totalTime = activity.movingTime;
+      const avgPace = totalDist > 0 ? (totalTime / 60) / totalDist : 0;
+      const avgHr = activity.averageHr || 0;
+      const maxHr = activity.maxHr || avgHr;
+      
+      const numFullKms = Math.floor(totalDist);
+      const lastKmFraction = totalDist - numFullKms;
+      
+      for (let i = 0; i < numFullKms; i++) {
+        data.push({
+          km: `${i + 1}`,
+          distance: 1.0,
+          time: Math.round(totalTime / totalDist),
+          pace: avgPace,
+          elevation: activity.elevationM > 0 ? activity.elevationM / totalDist : 0,
+          hr: avgHr,
+          maxHr: maxHr
+        });
+      }
+      
+      if (lastKmFraction > 0.05) {
+        data.push({
+          km: `${numFullKms + 1}`,
+          distance: lastKmFraction,
+          time: Math.round((totalTime / totalDist) * lastKmFraction),
+          pace: avgPace,
+          elevation: activity.elevationM > 0 ? (activity.elevationM / totalDist) * lastKmFraction : 0,
+          hr: avgHr,
+          maxHr: maxHr
+        });
+      }
+      return data;
+    }
+    return [];
+  })();
+
   useEffect(() => {
     const fetchActivity = async () => {
       try {
@@ -133,114 +227,6 @@ export const ActivityDetail = () => {
     };
     fetchActivity();
   }, [id]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!activity) return null;
-
-  const speed = activity.movingTime > 0 ? activity.distanceKm / (activity.movingTime / 3600) : 0;
-  const elevationGain = activity.elevationM || 0;
-  const calories = activity.calories || 0;
-  const avgHr = activity.averageHr || 0;
-  const maxHr = activity.maxHr || 0;
-  const intensity = maxHr > 0 ? Math.round((avgHr / maxHr) * 100) : 0;
-
-  // Obtener lapsData desde laps reales, splits de Strava o generar splits virtuales
-  let lapsData = [];
-  if (activity.laps && activity.laps.length > 0) {
-    const isManual = activity.laps.some(l => Math.abs(l.distance - 1.0) > 0.05);
-    lapsData = activity.laps.map((lap, index) => {
-      const paceVal = lap.averagePace || 0;
-      const distVal = lap.distance || 0;
-      return {
-        km: isManual ? `Vuelta ${lap.splitNum || (index + 1)}` : `${lap.splitNum || (index + 1)}`,
-        distance: distVal,
-        time: Math.round(paceVal * distVal * 60),
-        pace: paceVal,
-        elevation: lap.elevationGain || 0,
-        hr: lap.averageHr || 0,
-        maxHr: lap.maxHr || 0,
-      };
-    });
-  } else if (activity.rawData?.laps && Array.isArray(activity.rawData.laps) && activity.rawData.laps.length > 0) {
-    // Usar laps detallados originales de Strava si están en rawData (series de pista)
-    lapsData = activity.rawData.laps.map((lap, index) => {
-      const distKm = (lap.distance || 0) / 1000;
-      return {
-        km: lap.name || `Vuelta ${index + 1}`,
-        distance: distKm,
-        time: Math.round(lap.moving_time || lap.elapsed_time || 0),
-        pace: distKm > 0 ? (lap.moving_time || lap.elapsed_time || 0) / 60 / distKm : 0,
-        elevation: lap.total_elevation_gain || 0,
-        hr: lap.average_heartrate || 0,
-        maxHr: lap.max_heartrate || 0,
-      };
-    });
-  } else if (activity.rawData?.splits_metric && Array.isArray(activity.rawData.splits_metric)) {
-    lapsData = activity.rawData.splits_metric.map((split, index) => {
-      const distKm = (split.distance || 0) / 1000;
-      return {
-        km: `${split.split || (index + 1)}`,
-        distance: distKm,
-        time: Math.round(split.moving_time || split.elapsed_time || 0),
-        pace: distKm > 0 ? (split.moving_time || split.elapsed_time || 0) / 60 / distKm : 0,
-        elevation: split.elevation_difference || 0,
-        hr: split.average_heartrate || 0,
-        maxHr: split.average_heartrate || 0,
-      };
-    });
-  } else if (activity.distanceKm > 0) {
-    const totalDist = activity.distanceKm;
-    const totalTime = activity.movingTime;
-    const avgPace = totalDist > 0 ? (totalTime / 60) / totalDist : 0;
-    const avgHr = activity.averageHr || 0;
-    const maxHr = activity.maxHr || avgHr;
-    
-    const numFullKms = Math.floor(totalDist);
-    const lastKmFraction = totalDist - numFullKms;
-    
-    for (let i = 0; i < numFullKms; i++) {
-      lapsData.push({
-        km: `${i + 1}`,
-        distance: 1.0,
-        time: Math.round(totalTime / totalDist),
-        pace: avgPace,
-        elevation: activity.elevationM > 0 ? activity.elevationM / totalDist : 0,
-        hr: avgHr,
-        maxHr: maxHr
-      });
-    }
-    
-    if (lastKmFraction > 0.05) {
-      lapsData.push({
-        km: `${numFullKms + 1}`,
-        distance: lastKmFraction,
-        time: Math.round((totalTime / totalDist) * lastKmFraction),
-        pace: avgPace,
-        elevation: activity.elevationM > 0 ? (activity.elevationM / totalDist) * lastKmFraction : 0,
-        hr: avgHr,
-        maxHr: maxHr
-      });
-    }
-  }
-
-
-// Decodificar o extraer coordenadas
-  const coords = (() => {
-    if (!activity) return [];
-    if (activity.rawData?.coordinates && Array.isArray(activity.rawData.coordinates)) {
-      return activity.rawData.coordinates;
-    } else if (activity.rawData?.map?.summary_polyline) {
-      return decodePolyline(activity.rawData.map.summary_polyline);
-    }
-    return [];
-  })();
 
   // Calcular distancias acumuladas para cada punto de la ruta
   useEffect(() => {
@@ -289,6 +275,24 @@ export const ActivityDetail = () => {
       }
     }
   }, [playbackIndex, coordsDistances, isHoveringChart, lapsData.length, hoveredIndex]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!activity) return null;
+
+  const speed = activity.movingTime > 0 ? activity.distanceKm / (activity.movingTime / 3600) : 0;
+  const elevationGain = activity.elevationM || 0;
+  const calories = activity.calories || 0;
+  const avgHr = activity.averageHr || 0;
+  const maxHr = activity.maxHr || 0;
+  const intensity = maxHr > 0 ? Math.round((avgHr / maxHr) * 100) : 0;
+
 
   const handlePlayPause = () => {
     if (playbackIndex >= coords.length - 1) {
