@@ -34,14 +34,18 @@ export const QuickStats = ({ activities }) => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Esta semana */}
       <Card neon>
-        <div className="space-y-1 sm:space-y-2">
-          <p className="label-text text-xs">ESTA SEMANA</p>
-          <p className="stat-number text-3xl sm:text-5xl neon-text-cyan">{formatDistance(metrics.thisWeek.distance)}</p>
-          <p className="text-text-secondary font-mono text-xs sm:text-sm">km</p>
-          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-1">
+        <div className="space-y-1">
+          <p className="label-text text-xs text-text-secondary font-mono">ESTA SEMANA</p>
+          <div className="flex items-baseline gap-1 mt-2">
+            <p className="stat-number text-3xl sm:text-5xl font-mono font-bold text-accent-cyan">
+              {formatDistance(metrics.thisWeek.distance)}
+            </p>
+            <span className="text-text-secondary font-mono text-xs sm:text-sm">km</span>
+          </div>
+          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-2 opacity-80">
             {metrics.thisWeek.count} actividades
           </p>
         </div>
@@ -49,11 +53,15 @@ export const QuickStats = ({ activities }) => {
 
       {/* Este mes */}
       <Card neon>
-        <div className="space-y-1 sm:space-y-2">
-          <p className="label-text text-xs">ESTE MES</p>
-          <p className="stat-number text-3xl sm:text-5xl neon-text-lime">{formatDistance(metrics.thisMonth.distance)}</p>
-          <p className="text-text-secondary font-mono text-xs sm:text-sm">km</p>
-          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-1">
+        <div className="space-y-1">
+          <p className="label-text text-xs text-text-secondary font-mono">ESTE MES</p>
+          <div className="flex items-baseline gap-1 mt-2">
+            <p className="stat-number text-3xl sm:text-5xl font-mono font-bold text-accent-lime">
+              {formatDistance(metrics.thisMonth.distance)}
+            </p>
+            <span className="text-text-secondary font-mono text-xs sm:text-sm">km</span>
+          </div>
+          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-2 opacity-80">
             {metrics.thisMonth.count} actividades
           </p>
         </div>
@@ -61,23 +69,31 @@ export const QuickStats = ({ activities }) => {
 
       {/* Récord distancia */}
       <Card neon>
-        <div className="space-y-1 sm:space-y-2">
-          <p className="label-text text-xs">RÉCORD</p>
-          <p className="stat-number text-3xl sm:text-5xl neon-text-gold">{formatDistance(metrics.record.distance)}</p>
-          <p className="text-text-secondary font-mono text-xs sm:text-sm">km</p>
-          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-1 truncate">
-            {metrics.record.name}
+        <div className="space-y-1">
+          <p className="label-text text-xs text-text-secondary font-mono">RÉCORD</p>
+          <div className="flex items-baseline gap-1 mt-2">
+            <p className="stat-number text-3xl sm:text-5xl font-mono font-bold text-accent-gold">
+              {formatDistance(metrics.record.distance)}
+            </p>
+            <span className="text-text-secondary font-mono text-xs sm:text-sm">km</span>
+          </div>
+          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-2 opacity-80 truncate" title={metrics.record.name}>
+            {metrics.record.name || 'Sin título'}
           </p>
         </div>
       </Card>
 
       {/* Racha */}
       <Card neon>
-        <div className="space-y-1 sm:space-y-2">
-          <p className="label-text text-xs">RACHA</p>
-          <p className="stat-number text-3xl sm:text-5xl neon-text-pink">{metrics.streak}</p>
-          <p className="text-text-secondary font-mono text-xs sm:text-sm">días</p>
-          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-1">
+        <div className="space-y-1">
+          <p className="label-text text-xs text-text-secondary font-mono">RACHA</p>
+          <div className="flex items-baseline gap-1 mt-2">
+            <p className="stat-number text-3xl sm:text-5xl font-mono font-bold text-accent-pink">
+              {metrics.streak}
+            </p>
+            <span className="text-text-secondary font-mono text-xs sm:text-sm">días</span>
+          </div>
+          <p className="text-text-secondary font-mono text-[10px] sm:text-xs mt-2 opacity-80">
             {metrics.streak > 0 ? '¡Sigue así!' : 'Sin racha'}
           </p>
         </div>

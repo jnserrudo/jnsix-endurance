@@ -39,7 +39,7 @@ export const AnalysisResult = ({ response }) => {
       if (headerMatch) {
         if (currentSection) {
           sections.push({
-            title: currentSection,
+            title: currentSection.title,
             content: currentContent.join('\n'),
             index: currentSection.index
           });

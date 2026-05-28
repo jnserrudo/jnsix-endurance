@@ -82,11 +82,18 @@ export const Dashboard = () => {
         ))}
       </div>
 
-      {/* Layout 3 columnas para resumen */}
+      {/* Metricas generales al inicio (full width) */}
+      {activeTab === 'resumen' && activities.length > 0 && (
+        <div className="w-full animate-scale-in">
+          <QuickStats activities={activities} />
+        </div>
+      )}
+
+      {/* Layout 2 columnas para el resto del resumen */}
       {activeTab === 'resumen' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Columna Izquierda - Recent Activity Feed (25%) */}
-          <div className="lg:col-span-3 space-y-4">
+          {/* Columna Izquierda - Recent Activity Feed (33% de ancho -> 4 columnas) */}
+          <div className="lg:col-span-4 space-y-4">
             <GlassCard>
               <h3 className="text-lg font-semibold text-text-primary mb-4">ACTIVIDADES RECIENTES</h3>
               <div className="space-y-3">
@@ -129,19 +136,11 @@ export const Dashboard = () => {
             </GlassCard>
           </div>
 
-          {/* Columna Centro - Main Graph (50%) */}
-          <div className="lg:col-span-6 space-y-4">
-            <GlassCard className="h-full">
+          {/* Columna Derecha - Main Graph (67% de ancho -> 8 columnas) */}
+          <div className="lg:col-span-8 space-y-4">
+            <GlassCard>
               <h3 className="text-lg font-semibold text-text-primary mb-4">PROGRESO</h3>
               {activities.length > 0 && <ProgressCharts activities={activities} />}
-            </GlassCard>
-          </div>
-
-          {/* Columna Derecha - Goals & Metrics (25%) */}
-          <div className="lg:col-span-3 space-y-4">
-            <GlassCard>
-              <h3 className="text-lg font-semibold text-text-primary mb-4">MÉTRICAS</h3>
-              {activities.length > 0 && <QuickStats activities={activities} />}
             </GlassCard>
           </div>
         </div>

@@ -2,6 +2,44 @@ import { ResponsiveLine } from '@nivo/line';
 import { ResponsiveBar } from '@nivo/bar';
 import { formatDistance, formatDate } from '../../utils/formatters';
 
+const CHART_THEME = {
+  axis: {
+    domain: {
+      line: {
+        stroke: 'rgba(255, 255, 255, 0.1)',
+        strokeWidth: 1
+      }
+    },
+    ticks: {
+      line: {
+        stroke: 'rgba(255, 255, 255, 0.1)',
+        strokeWidth: 1
+      },
+      text: {
+        fill: '#B8BCC5',
+        fontSize: 10,
+        fontFamily: 'JetBrains Mono, monospace'
+      }
+    }
+  },
+  grid: {
+    line: {
+      stroke: 'rgba(255, 255, 255, 0.05)',
+      strokeWidth: 1
+    }
+  },
+  tooltip: {
+    container: {
+      background: '#151A23',
+      color: '#E6EDF3',
+      fontSize: 12,
+      borderRadius: 4,
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+    }
+  }
+};
+
 export const ProgressCharts = ({ activities }) => {
   // Agrupar actividades por semana (últimas 8 semanas)
   const weeklyData = activities.reduce((acc, activity) => {
@@ -78,7 +116,6 @@ export const ProgressCharts = ({ activities }) => {
             }}
             enableGridX={false}
             enableGridY={true}
-            gridYValues={weeklyChartData.map(d => d.y)}
             gridYLineColor="rgba(255, 255, 255, 0.05)"
             colors={['#00D4FF']}
             lineWidth={3}
@@ -99,17 +136,7 @@ export const ProgressCharts = ({ activities }) => {
                 </div>
               </div>
             )}
-            theme={{
-              tooltip: {
-                container: {
-                  background: 'rgba(26, 31, 46, 0.9)',
-                  color: '#E8EAED',
-                  fontSize: 12,
-                  borderRadius: 8,
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-                }
-              }
-            }}
+            theme={CHART_THEME}
           />
         </div>
       </div>
@@ -160,17 +187,7 @@ export const ProgressCharts = ({ activities }) => {
                 </div>
               </div>
             )}
-            theme={{
-              tooltip: {
-                container: {
-                  background: 'rgba(26, 31, 46, 0.9)',
-                  color: '#E8EAED',
-                  fontSize: 12,
-                  borderRadius: 8,
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-                }
-              }
-            }}
+            theme={CHART_THEME}
             animate={true}
             motionConfig="stiff"
           />

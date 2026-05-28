@@ -1,6 +1,44 @@
 import { ResponsivePie } from '@nivo/pie';
 import { GlassCard } from '../ui/GlassCard';
 
+const CHART_THEME = {
+  axis: {
+    domain: {
+      line: {
+        stroke: 'rgba(255, 255, 255, 0.1)',
+        strokeWidth: 1
+      }
+    },
+    ticks: {
+      line: {
+        stroke: 'rgba(255, 255, 255, 0.1)',
+        strokeWidth: 1
+      },
+      text: {
+        fill: '#B8BCC5',
+        fontSize: 10,
+        fontFamily: 'JetBrains Mono, monospace'
+      }
+    }
+  },
+  grid: {
+    line: {
+      stroke: 'rgba(255, 255, 255, 0.05)',
+      strokeWidth: 1
+    }
+  },
+  tooltip: {
+    container: {
+      background: '#151A23',
+      color: '#E6EDF3',
+      fontSize: 12,
+      borderRadius: 4,
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+    }
+  }
+};
+
 export const HeartRateZones = ({ activities }) => {
   // Filtrar actividades con datos de frecuencia cardíaca
   const activitiesWithHR = activities.filter(a => a.averageHr && a.averageHr > 0);
@@ -126,17 +164,7 @@ export const HeartRateZones = ({ activities }) => {
                   </div>
                 </div>
               )}
-              theme={{
-                tooltip: {
-                  container: {
-                    background: 'rgba(26, 31, 46, 0.9)',
-                    color: '#E8EAED',
-                    fontSize: 12,
-                    borderRadius: 8,
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-                  }
-                }
-              }}
+              theme={CHART_THEME}
               animate={true}
               motionConfig="stiff"
             />
