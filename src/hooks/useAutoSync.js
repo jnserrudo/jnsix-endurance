@@ -54,7 +54,7 @@ export const useAutoSync = () => {
       const { jobId } = await activitiesService.createSyncJob(after);
       jobIdRef.current = jobId;
       
-      toast.loading('🔄 Iniciando sincronización...', { id: 'sync-toast' });
+      toast.loading('Iniciando sincronización...', { id: 'sync-toast' });
       
       // Poll cada 1 segundo
       pollingIntervalRef.current = setInterval(() => {

@@ -121,7 +121,7 @@ export const Competitions = () => {
     try {
       const data = await aiService.analyzeCompetitionGoal(compId);
       setAiReport(data.response);
-      toast.success('¡Reporte de Estrategia e Inteligencia de Carrera Generado!', { icon: '🏆' });
+      toast.success('¡Reporte de Estrategia e Inteligencia de Carrera Generado!');
     } catch (error) {
       toast.error('Error al generar análisis con IA. Asegúrate de tener entrenamientos registrados.');
     } finally {
@@ -180,7 +180,7 @@ export const Competitions = () => {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl lg:text-4xl font-mono font-bold neon-text-cyan flex items-center gap-2">
-            🏆 COMPETENCIAS Y OBJETIVOS IA
+            COMPETENCIAS Y OBJETIVOS IA
           </h1>
           <p className="text-text-secondary text-sm mt-2 font-mono">
             Planifica tus carreras objetivo, vincula simulaciones y genera estrategias competitivas científicas con Inteligencia Artificial.
@@ -610,7 +610,19 @@ export const Competitions = () => {
 
             <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
               {activities
-                .filter(act => act.type === selectedComp.type || (selectedComp.type === 'TRAIL_RUN' && act.type === 'RUN'))
+                .filter(act => {
+                  const runningTypes = ['RUN', 'TRAIL_RUN', 'VIRTUAL_RUN', 'HIKE', 'WALK'];
+                  const cyclingTypes = ['RIDE', 'VIRTUAL_RIDE'];
+                  const swimmingTypes = ['SWIM'];
+                  const compType = selectedComp.type;
+                  const actType = act.type;
+                  
+                  if (runningTypes.includes(compType) && runningTypes.includes(actType)) return true;
+                  if (cyclingTypes.includes(compType) && cyclingTypes.includes(actType)) return true;
+                  if (swimmingTypes.includes(compType) && swimmingTypes.includes(actType)) return true;
+                  
+                  return compType === actType || compType === 'OTHER' || actType === 'OTHER';
+                })
                 .map((act) => {
                   const isAssociated = selectedComp.simulations?.some(s => s.id === act.id);
                   return (

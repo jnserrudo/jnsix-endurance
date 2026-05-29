@@ -296,7 +296,7 @@ export const Activities = () => {
             <input {...getInputProps()} />
             <div className="flex flex-col items-center justify-center space-y-3">
               <span className="text-3xl text-accent-cyan animate-pulse-neon">
-                ☁️
+                ⇪
               </span>
               <p className="text-sm font-mono text-text-primary">
                 {isDragActive

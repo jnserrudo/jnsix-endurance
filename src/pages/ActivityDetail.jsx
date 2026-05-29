@@ -293,6 +293,75 @@ export const ActivityDetail = () => {
   const maxHr = activity.maxHr || 0;
   const intensity = maxHr > 0 ? Math.round((avgHr / maxHr) * 100) : 0;
 
+  const isGymActivity = activity.distanceKm === 0 || activity.type === 'OTHER';
+  const isSwimActivity = activity.type === 'SWIM';
+
+  const formatSwimPace = (distanceKm, timeSeconds) => {
+    if (!distanceKm || !timeSeconds) return '0:00';
+    const distanceM = distanceKm * 1000;
+    const hundreds = distanceM / 100;
+    if (hundreds === 0) return '0:00';
+    const paceSeconds = timeSeconds / hundreds;
+    let minutes = Math.floor(paceSeconds / 60);
+    let seconds = Math.round(paceSeconds % 60);
+    if (seconds === 60) {
+      minutes += 1;
+      seconds = 0;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Detección automática de series/intervalos en pista
+  const intervalAnalysis = (() => {
+    if (!lapsData || lapsData.length < 3) return null;
+    if (activity.type !== 'RUN' && activity.type !== 'TRAIL_RUN') return null;
+    
+    const validLaps = lapsData.filter(l => l.distance > 0 && l.pace > 0);
+    if (validLaps.length < 3) return null;
+    
+    const paces = validLaps.map(l => l.pace);
+    const minPace = Math.min(...paces);
+    const maxPace = Math.max(...paces);
+    
+    // Rango de ritmo > 30 segundos/km para calificar como intervalo
+    if (maxPace - minPace < 0.5) return null;
+    
+    const avgPace = paces.reduce((sum, p) => sum + p, 0) / paces.length;
+    
+    const activeLaps = [];
+    const recoveryLaps = [];
+    
+    validLaps.forEach(l => {
+      // Si el ritmo es 2.5% más rápido que la media, es intervalo activo
+      if (l.pace < avgPace * 0.975) {
+        activeLaps.push(l);
+      } else {
+        recoveryLaps.push(l);
+      }
+    });
+    
+    if (activeLaps.length === 0 || recoveryLaps.length === 0) return null;
+    
+    const avgActivePace = activeLaps.reduce((sum, l) => sum + l.pace, 0) / activeLaps.length;
+    const avgRecoveryPace = recoveryLaps.reduce((sum, l) => sum + l.pace, 0) / recoveryLaps.length;
+    
+    const formatPaceDec = (paceMinKm) => {
+      let mins = Math.floor(paceMinKm);
+      let secs = Math.round((paceMinKm - mins) * 60);
+      if (secs === 60) { mins += 1; secs = 0; }
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+    
+    return {
+      isInterval: true,
+      activeCount: activeLaps.length,
+      recoveryCount: recoveryLaps.length,
+      avgActivePaceStr: formatPaceDec(avgActivePace),
+      avgRecoveryPaceStr: formatPaceDec(avgRecoveryPace),
+      activeLapsIds: new Set(activeLaps.map(l => l.km)),
+    };
+  })();
+
 
   const handlePlayPause = () => {
     if (playbackIndex >= coords.length - 1) {
@@ -343,44 +412,110 @@ export const ActivityDetail = () => {
 
       <div className="h-px bg-gradient-to-r from-transparent via-accent-pace to-transparent" />
 
-      {/* Métricas principales */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Card neon className="p-4">
-          <p className="label-text text-xs mb-1">DISTANCIA</p>
-          <p className="stat-number text-2xl lg:text-3xl text-accent-cyan">{formatDistance(activity.distanceKm * 1000)}</p>
-          <p className="text-text-secondary font-mono text-xs">KM</p>
-        </Card>
+      {/* Métricas principales adaptativas */}
+      {isGymActivity ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">TIEMPO TOTAL</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-lime">{formatTime(activity.movingTime)}</p>
+            <p className="text-text-secondary font-mono text-xs">H:M:S</p>
+          </Card>
 
-        <Card neon className="p-4">
-          <p className="label-text text-xs mb-1">TIEMPO</p>
-          <p className="stat-number text-2xl lg:text-3xl text-accent-lime">{formatTime(activity.movingTime)}</p>
-          <p className="text-text-secondary font-mono text-xs">H:M:S</p>
-        </Card>
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">CALORÍAS</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-cyan">{calories}</p>
+            <p className="text-text-secondary font-mono text-xs">KCAL</p>
+          </Card>
 
-        <Card neon className="p-4">
-          <p className="label-text text-xs mb-1">RITMO</p>
-          <p className="stat-number text-2xl lg:text-3xl text-accent-pink">{formatPace(activity.distanceKm, activity.movingTime)}</p>
-          <p className="text-text-secondary font-mono text-xs">MIN/KM</p>
-        </Card>
+          {avgHr > 0 && (
+            <Card neon className="p-4">
+              <p className="label-text text-xs mb-1">FC MEDIA</p>
+              <p className="stat-number text-2xl lg:text-3xl text-accent-pink">{avgHr}</p>
+              <p className="text-text-secondary font-mono text-xs">BPM</p>
+            </Card>
+          )}
 
-        <Card neon className="p-4">
-          <p className="label-text text-xs mb-1">VELOCIDAD</p>
-          <p className="stat-number text-2xl lg:text-3xl text-accent-cyan">{speed.toFixed(1)}</p>
-          <p className="text-text-secondary font-mono text-xs">KM/H</p>
-        </Card>
+          {maxHr > 0 && (
+            <Card neon className="p-4">
+              <p className="label-text text-xs mb-1">FC MÁXIMA</p>
+              <p className="stat-number text-2xl lg:text-3xl text-accent-pink">{maxHr}</p>
+              <p className="text-text-secondary font-mono text-xs">BPM</p>
+            </Card>
+          )}
+        </div>
+      ) : isSwimActivity ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">DISTANCIA</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-cyan">{Math.round(activity.distanceKm * 1000)}</p>
+            <p className="text-text-secondary font-mono text-xs">METROS</p>
+          </Card>
 
-        <Card neon className="p-4">
-          <p className="label-text text-xs mb-1">DESNIVEL +</p>
-          <p className="stat-number text-2xl lg:text-3xl text-accent-gold">{formatElevation(elevationGain)}</p>
-          <p className="text-text-secondary font-mono text-xs">M</p>
-        </Card>
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">TIEMPO</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-lime">{formatTime(activity.movingTime)}</p>
+            <p className="text-text-secondary font-mono text-xs">H:M:S</p>
+          </Card>
 
-        <Card neon className="p-4">
-          <p className="label-text text-xs mb-1">CALORÍAS</p>
-          <p className="stat-number text-2xl lg:text-3xl text-accent-lime">{calories}</p>
-          <p className="text-text-secondary font-mono text-xs">KCAL</p>
-        </Card>
-      </div>
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">RITMO MEDIO</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-pink">{formatSwimPace(activity.distanceKm, activity.movingTime)}</p>
+            <p className="text-text-secondary font-mono text-xs font-bold text-[10px]">MIN/100M</p>
+          </Card>
+
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">CALORÍAS</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-lime">{calories}</p>
+            <p className="text-text-secondary font-mono text-xs">KCAL</p>
+          </Card>
+
+          {avgHr > 0 && (
+            <Card neon className="p-4">
+              <p className="label-text text-xs mb-1">FC MEDIA</p>
+              <p className="stat-number text-2xl lg:text-3xl text-accent-pink">{avgHr}</p>
+              <p className="text-text-secondary font-mono text-xs">BPM</p>
+            </Card>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">DISTANCIA</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-cyan">{formatDistance(activity.distanceKm * 1000)}</p>
+            <p className="text-text-secondary font-mono text-xs">KM</p>
+          </Card>
+
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">TIEMPO</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-lime">{formatTime(activity.movingTime)}</p>
+            <p className="text-text-secondary font-mono text-xs">H:M:S</p>
+          </Card>
+
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">RITMO</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-pink">{formatPace(activity.distanceKm, activity.movingTime)}</p>
+            <p className="text-text-secondary font-mono text-xs">MIN/KM</p>
+          </Card>
+
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">VELOCIDAD</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-cyan">{speed.toFixed(1)}</p>
+            <p className="text-text-secondary font-mono text-xs">KM/H</p>
+          </Card>
+
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">DESNIVEL +</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-gold">{formatElevation(elevationGain)}</p>
+            <p className="text-text-secondary font-mono text-xs">M</p>
+          </Card>
+
+          <Card neon className="p-4">
+            <p className="label-text text-xs mb-1">CALORÍAS</p>
+            <p className="stat-number text-2xl lg:text-3xl text-accent-lime">{calories}</p>
+            <p className="text-text-secondary font-mono text-xs">KCAL</p>
+          </Card>
+        </div>
+      )}
 
       {/* Métricas de FC */}
       {avgHr > 0 && (
@@ -702,13 +837,45 @@ export const ActivityDetail = () => {
             )}
           </div>
 
+          {/* Análisis Especializado de Series de Pista / Intervalos */}
+          {intervalAnalysis && (
+            <Card neon className="p-6 border-l-4 border-accent-lime">
+              <h3 className="text-sm font-mono font-bold text-accent-lime mb-3 tracking-wider uppercase">
+                ANÁLISIS DE SERIES Y ENTRENAMIENTO DE PISTA
+              </h3>
+              <p className="text-xs text-text-secondary leading-relaxed mb-4">
+                JNSIX AI ha detectado de forma automática una sesión fraccionada por intervalos en esta actividad, separando el esfuerzo de velocidad de los períodos de recuperación activa.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-xs">
+                <div className="bg-panel-bg p-3 border border-border-primary rounded">
+                  <span className="block text-[9px] text-text-secondary mb-1">INTERVALOS ACTIVOS</span>
+                  <span className="text-base font-bold text-accent-cyan">{intervalAnalysis.activeCount} series</span>
+                </div>
+                <div className="bg-panel-bg p-3 border border-border-primary rounded">
+                  <span className="block text-[9px] text-text-secondary mb-1">RITMO MEDIO DE SERIES</span>
+                  <span className="text-base font-bold text-accent-lime">{intervalAnalysis.avgActivePaceStr} /km</span>
+                </div>
+                <div className="bg-panel-bg p-3 border border-border-primary rounded">
+                  <span className="block text-[9px] text-text-secondary mb-1">SERIES DE RECUPERACIÓN</span>
+                  <span className="text-base font-bold text-text-primary">{intervalAnalysis.recoveryCount} vueltas</span>
+                </div>
+                <div className="bg-panel-bg p-3 border border-border-primary rounded">
+                  <span className="block text-[9px] text-text-secondary mb-1">RITMO DE RECUPERACIÓN</span>
+                  <span className="text-base font-bold text-text-secondary">{intervalAnalysis.avgRecoveryPaceStr} /km</span>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Tabla de Splits */}
           {lapsData && lapsData.length > 0 && (
             <Card className="p-4">
               <h3 className="text-sm font-mono font-bold text-text-primary mb-4 tracking-tight">
-                {activity.laps?.some(l => Math.abs(l.distance - 1.0) > 0.05) || activity.rawData?.laps?.length > 0
-                  ? 'DETALLE POR VUELTA' 
-                  : 'DETALLE POR KILÓMETRO'}
+                {isSwimActivity 
+                  ? 'DETALLE POR INTERVALO' 
+                  : (activity.laps?.some(l => Math.abs(l.distance - 1.0) > 0.05) || activity.rawData?.laps?.length > 0)
+                    ? 'DETALLE POR VUELTA' 
+                    : 'DETALLE POR KILÓMETRO'}
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full font-mono text-xs">
@@ -717,28 +884,49 @@ export const ActivityDetail = () => {
                       <th className="text-left py-2 px-2 label-text">VUELTA / KM</th>
                       <th className="text-right py-2 px-2 label-text">DISTANCIA</th>
                       <th className="text-right py-2 px-2 label-text">TIEMPO</th>
-                      <th className="text-right py-2 px-2 label-text">RITMO</th>
-                      <th className="text-right py-2 px-2 label-text">DESNIVEL</th>
+                      <th className="text-right py-2 px-2 label-text">{isSwimActivity ? 'RITMO (100M)' : 'RITMO'}</th>
+                      <th className="text-right py-2 px-2 label-text">{isSwimActivity ? 'CLAVE' : 'DESNIVEL'}</th>
                       <th className="text-right py-2 px-2 label-text">FC</th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    {lapsData.map((lap, index) => (
-                      <tr
-                        key={index}
-                        className={`border-b border-border-primary hover:bg-panel-bg/50 transition-all ${
-                          hoveredIndex === index ? 'bg-accent-cyan/15 border-l-2 border-accent-cyan' : ''
-                        }`}
-                      >
-                        <td className="py-2 px-2 text-accent-pace font-bold">{lap.km}</td>
-                        <td className="py-2 px-2 text-right text-text-primary">{formatDistance(lap.distance || 0)} km</td>
-                        <td className="py-2 px-2 text-right text-text-primary">{formatTime(lap.time || 0)}</td>
-                        <td className="py-2 px-2 text-right text-accent-cyan">{formatPace(lap.distance || 0, lap.time || 0)}</td>
-                        <td className="py-2 px-2 text-right text-accent-gold">{formatElevation(lap.elevation || 0)} m</td>
-                        <td className="py-2 px-2 text-right text-accent-pink">{lap.hr ? Math.round(lap.hr) : '-'}</td>
-                      </tr>
-                    ))}
+                    {lapsData.map((lap, index) => {
+                      const isSwim = isSwimActivity;
+                      const distanceStr = isSwim ? `${Math.round(lap.distance * 1000)} m` : `${(lap.distance || 0).toFixed(2)} km`;
+                      const paceStr = isSwim ? formatSwimPace(lap.distance, lap.time) : formatPace(lap.distance || 0, lap.time || 0);
+                      
+                      // Clasificación visual de series
+                      const isActive = intervalAnalysis?.activeLapsIds.has(lap.km);
+                      const lapBadge = intervalAnalysis ? (isActive ? 'SERIE' : 'RECUP.') : null;
+                      
+                      return (
+                        <tr
+                          key={index}
+                          className={`border-b border-border-primary hover:bg-panel-bg/50 transition-all ${
+                            hoveredIndex === index ? 'bg-accent-cyan/15 border-l-2 border-accent-cyan' : ''
+                          }`}
+                        >
+                          <td className="py-2 px-2 text-accent-pace font-bold flex items-center gap-2">
+                            <span>{lap.km}</span>
+                            {lapBadge && (
+                              <span className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${
+                                isActive ? 'bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/30' : 'bg-panel-bg-solid text-text-secondary border border-border-primary'
+                              }`}>
+                                {lapBadge}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2 px-2 text-right text-text-primary">{distanceStr}</td>
+                          <td className="py-2 px-2 text-right text-text-primary">{formatTime(lap.time || 0)}</td>
+                          <td className="py-2 px-2 text-right text-accent-cyan">{paceStr}</td>
+                          <td className="py-2 px-2 text-right text-accent-gold">
+                            {isSwim ? 'Estilo' : `${formatElevation(lap.elevation || 0)} m`}
+                          </td>
+                          <td className="py-2 px-2 text-right text-accent-pink">{lap.hr ? Math.round(lap.hr) : '-'}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

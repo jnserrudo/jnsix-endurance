@@ -62,7 +62,7 @@ export const Sidebar = () => {
       <nav className="flex-1 py-4">
         <NavItem to="/dashboard" icon="◆" label="DASHBOARD" onClick={closeSidebar} />
         <NavItem to="/activities" icon="▶" label="ACTIVIDADES" onClick={closeSidebar} />
-        <NavItem to="/competitions" icon="🏆" label="COMPETENCIAS" onClick={closeSidebar} />
+        <NavItem to="/competitions" icon="⚑" label="COMPETENCIAS" onClick={closeSidebar} />
         <NavItem to="/ai-analysis" icon="◉" label="ANÁLISIS IA" onClick={closeSidebar} />
         <NavItem to="/ai-coach" icon="★" label="COACH IA" onClick={closeSidebar} />
         <NavItem to="/comparisons" icon="◭" label="COMPARACIONES" onClick={closeSidebar} />
